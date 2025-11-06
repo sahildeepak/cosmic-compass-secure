@@ -72,25 +72,25 @@
         <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl border-t border-indigo-700/50 z-20">
             <div class="max-w-md mx-auto flex justify-around items-center h-16">
                 <!-- HOME Button -->
-                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200" data-view="home" onclick="switchView('home')">
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="home" onclick="switchView('home')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                     <span class="mt-1">Home</span>
                 </button>
                 
                 <!-- CHART Button -->
-                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200" data-view="chart" onclick="switchView('chart')">
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="chart" onclick="switchView('chart')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"/><path d="M12 2v10"/><path d="M18.4 6.6l-2.1 2.1"/><path d="M5.6 6.6l2.1 2.1"/></svg>
                     <span class="mt-1">Chart</span>
                 </button>
                 
                 <!-- HEALTH Button -->
-                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200" data-view="health" onclick="switchView('health')">
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-pink-300" data-view="health" onclick="switchView('health')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M20.5 2L15 6.5l-3-3L2 12l9.5 9.5 3-3L17.5 20l4.5-5.5z"/><path d="M12 12l-7-7"/></svg>
                     <span class="mt-1">Health</span>
                 </button>
                 
                 <!-- HISTORY Button -->
-                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200" data-view="history" onclick="switchView('history')">
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-teal-300" data-view="history" onclick="switchView('history')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 21a9 9 0 0 0 9-9h-2a7 7 0 0 1-7 7V12h-2V7h2V5H9a9 9 0 0 0-9 9z"/><polyline points="12 6 12 12 16 14"/></svg>
                     <span class="mt-1">History</span>
                 </button>
@@ -116,7 +116,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, addDoc, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, addDoc, getDocs, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global Firebase variables
@@ -125,12 +125,13 @@
         window.userId = null;
         window.isAuthReady = false;
         window.activeSnapshotUnsubscribe = null;
-        window.firebaseExports = null; // Will be populated *after* init
 
         // Mandated Global Variables Check
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        // YOUR FIREBASE CONFIG OBJECT
+        // --- THIS IS THE CRITICAL FIX ---
+        // You MUST paste your own Firebase config object here.
+        // Get it from your Firebase project console.
         const firebaseConfig = {
           apiKey: "AIzaSyD_hTndy6xst4f8hxAbJ42R9sX_82BMFdc",
           authDomain: "cosmic-compass-dbc12.firebaseapp.com",
@@ -144,91 +145,85 @@
         // We set initialAuthToken to null because it doesn't exist on Netlify
         const initialAuthToken = null; 
 
-        // Check if the config is filled out
+        // Check if the config has been filled
         if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
-            try {
-                setLogLevel('debug'); // Enable Firestore logging for debugging
-                const app = initializeApp(firebaseConfig);
-                window.db = getFirestore(app);
-                window.auth = getAuth(app);
-
-                // *** THIS IS THE FIX ***
-                // Initialize firebaseExports *immediately* after app init
-                window.firebaseExports = {
-                    createUserWithEmailAndPassword,
-                    signInWithEmailAndPassword,
-                    signOut,
-                    doc,
-                    setDoc,
-                    collection,
-                    query,
-                    where,
-                    addDoc,
-                    onSnapshot,
-                    getDocs,
-                    orderBy,
-                    appId,
-                    db,
-                    auth
-                };
-                
-                // 1. Initial Authentication and Listener Setup
-                onAuthStateChanged(window.auth, async (user) => {
-                    if (user) {
-                        window.userId = user.uid;
-                    } else {
-                        // Sign in anonymously if no user is found, as a fallback
-                        try {
-                            await signInAnonymously(window.auth);
-                            window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
-                        } catch (e) {
-                            console.error("Anonymous sign-in failed:", e);
-                            // This is where auth/configuration-not-found would appear
-                            // If this fails, app will be stuck on splash screen
-                            document.getElementById('content-area').innerHTML = `<p class="text-center mt-8 text-red-400">Error: Could not authenticate with server. Please ensure Anonymous Sign-In is enabled in your Firebase project.</p>`;
-                            return;
-                        }
-                    }
-                    
-                    window.isAuthReady = true;
-                    
-                    // Once authenticated, load user profile and set up history listener
-                    await loadUserProfile();
-                    setupHistoryListener();
-                    
-                    console.log("Firebase initialized. User ID:", window.userId);
-
-                    // *** THIS IS THE FIX ***
-                    // ONLY render the initial view AFTER auth is confirmed.
-                    switchView('home'); 
-                });
-
-                // Attempt custom token sign-in if token is available
-                if (initialAuthToken) {
+            setLogLevel('debug'); // Enable Firestore logging for debugging
+            const app = initializeApp(firebaseConfig);
+            window.db = getFirestore(app);
+            window.auth = getAuth(app);
+            
+            // 1. Initial Authentication and Listener Setup
+            onAuthStateChanged(window.auth, async (user) => {
+                if (user) {
+                    window.userId = user.uid;
+                } else {
+                    // Sign in anonymously if no user is found
                     try {
-                        await signInWithCustomToken(window.auth, initialAuthToken);
-                    } catch (e)
-                    {
-                        console.error("Custom token sign-in failed:", e);
-                        // If token fails, auth listener will still trigger anonymous sign-in
+                        await signInAnonymously(window.auth);
+                        window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                        // This is the error you were seeing: auth/configuration-not-found
+                        // This MUST be fixed by ENABLING Anonymous Sign-In in your Firebase project.
+                        document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
+                            <h3 class="font-bold text-red-300 text-lg">Error: Could not authenticate with server.</h3>
+                            <p class="text-red-200 mt-2">Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.</p>
+                        </div>`;
+                        return; // Stop app initialization
                     }
-                } else if (!window.auth.currentUser) {
-                    // If no token and no user, trigger anonymous sign-in immediately
-                    // The onAuthStateChanged listener will catch this.
-                    signInAnonymously(window.auth).catch(e => console.error("Initial anonymous sign-in failed:", e));
                 }
+                
+                window.isAuthReady = true;
+                
+                // Once authenticated, load user profile and set up history listener
+                await loadUserProfile();
+                setupHistoryListener();
+                
+                console.log("Firebase initialized. User ID:", window.userId);
 
-            } catch (e) {
-                console.error("Firebase initialization failed:", e);
-                document.getElementById('content-area').innerHTML = `<p class="text-center mt-8 text-red-400">Error: Firebase app initialization failed. ${e.message}</p>`;
+                // *** THIS IS THE LOGIC FIX ***
+                // ONLY render the initial view AFTER auth is confirmed.
+                switchView('home'); 
+            });
+
+            // Handle the case where there is no pre-existing auth token
+            if (!initialAuthToken && !window.auth.currentUser) {
+                // Trigger anonymous sign-in immediately
+                // The onAuthStateChanged listener will catch this.
+                signInAnonymously(window.auth).catch(e => {
+                    console.error("Initial anonymous sign-in trigger failed:", e);
+                    // This error will be handled by the onAuthStateChanged listener's catch block
+                });
             }
 
         } else {
             console.error("Firebase config is missing. Please paste your Firebase project config into index.html.");
-            // If Firebase is missing, show an error.
-            document.getElementById('content-area').innerHTML = '<p class="text-center mt-8 text-red-400">Error: Firebase configuration is missing. The app cannot start.</p>';
+            // If Firebase is missing, show a clear error.
+            document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
+                <h3 class="font-bold text-red-300 text-lg">Error: Firebase configuration is missing.</h3>
+                <p class="text-red-200 mt-2">The app cannot start. Please paste your Firebase project config into the \`index.html\` file.</p>
+            </div>`;
         }
 
+        // Expose Firebase functions to global scope for use in non-module scripts
+        window.firebaseExports = {
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signOut,
+            doc,
+            setDoc,
+            collection,
+            query,
+            where,
+            addDoc,
+            onSnapshot,
+            getDocs,
+            orderBy,
+            deleteDoc, // Added deleteDoc
+            appId,
+            db,
+            auth
+        };
     </script>
     
     <!-- Application Logic -->
@@ -279,12 +274,6 @@
         // --- FIREBASE / DATA MANAGEMENT ---
         async function loadUserProfile() {
             if (!window.userId || !window.db) return;
-            // *** THIS IS THE FIX for "Cannot read properties of undefined (reading 'query')" ***
-            // Ensure firebaseExports is ready before trying to use it.
-            if (!window.firebaseExports) {
-                console.error("loadUserProfile: firebaseExports not ready.");
-                return; 
-            }
             const { db, appId, userId, doc, firebaseExports } = window.firebaseExports;
             try {
                 const profileQuery = firebaseExports.query(
@@ -307,8 +296,9 @@
                 console.error("Error loading profile:", e);
             }
         }
+
         async function saveUserProfile(details) {
-            if (!window.userId || !window.db || !window.firebaseExports) {
+            if (!window.userId || !window.db) {
                 showModal('Error', 'Please wait for authentication to complete.', 'error');
                 return;
             }
@@ -324,6 +314,7 @@
                 showModal('Error', 'Failed to save profile. Please check console for details.', 'error');
             }
         }
+        
         function setupHistoryListener() {
             if (window.activeSnapshotUnsubscribe) {
                 console.log("Detaching old history listener.");
@@ -331,13 +322,6 @@
                 window.activeSnapshotUnsubscribe = null;
             }
             if (!window.userId || !window.db) return;
-
-            // *** THIS IS THE FIX for "Cannot read properties of undefined (reading 'indexOf')" ***
-            // Ensure firebaseExports is ready before trying to use it.
-            if (!window.firebaseExports) {
-                console.error("setupHistoryListener: firebaseExports not ready.");
-                return;
-            }
             const { db, appId, userId, collection, query, onSnapshot } = window.firebaseExports;
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
             const q = query(historyRef); 
@@ -357,8 +341,9 @@
             });
             console.log("History listener active for user:", window.userId);
         }
+
         async function saveReading(readingData) {
-            if (!window.userId || !window.db || !window.firebaseExports) return;
+            if (!window.userId || !window.db) return;
             const { db, appId, userId, collection, addDoc } = window.firebaseExports;
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
             try {
@@ -372,8 +357,19 @@
                 console.error("Error saving reading:", e);
             }
         }
+
         async function deleteReading(id) {
-            showModal('Action Disabled', 'Deleting history items is disabled to maintain code stability in the current environment.', 'info');
+             if (!window.userId || !window.db) return;
+             // Re-enabled deleteDoc
+             const { db, appId, userId, doc, deleteDoc } = window.firebaseExports;
+             try {
+                await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'astrology_readings', id));
+                console.log("Reading deleted.");
+                // The onSnapshot listener will automatically update the UI
+             } catch (e) {
+                console.error("Error deleting reading:", e);
+                showModal('Error', 'Could not delete reading.', 'error');
+             }
         }
         
         // --- GEMINI API COMMUNICATION (SECURE PROXY) ---
@@ -410,15 +406,22 @@
                         continue;
                     }
                     
-                    // *** THIS IS THE ROBUST ERROR HANDLING FIX ***
-                    // Try to parse the error as JSON, but if it fails, use the raw text.
+                    // --- ROBUST ERROR HANDLING FIX ---
+                    // Read the error response as text ONCE.
                     let errorText = `Proxy request failed with status: ${response.status}`;
                     try {
-                        const errorResult = await response.json();
-                        errorText = errorResult.error || JSON.stringify(errorResult);
+                        const rawError = await response.text();
+                        // Try to parse it as JSON
+                        try {
+                            const errorResult = JSON.parse(rawError);
+                            errorText = errorResult.error || rawError;
+                        } catch (e) {
+                            // If parsing fails, use the raw text
+                            errorText = rawError;
+                        }
                     } catch (e) {
-                        // Failed to parse JSON, get raw text instead
-                        errorText = await response.text(); 
+                        // Failed to read text body, just use status
+                        console.error("Could not read error response body:", e);
                     }
                     throw new Error(errorText);
                 }
@@ -457,7 +460,7 @@
 
         // --- AUTH/PROFILE MODAL LOGIC ---
         function showProfileModal(requireAuth = false) {
-            if (!window.isAuthReady || !window.firebaseExports) {
+            if (!window.isAuthReady) {
                 showModal('Loading', 'Please wait while we connect to the server...', 'info');
                 return;
             }
@@ -540,6 +543,7 @@
             await signOut(window.auth);
             state.userProfile = { name: '', dob: '', tob: '', city: '' }; 
             showModal('Signed Out', 'You have been signed out. You are now an anonymous user.', 'info');
+            // Auth listener will handle signing in anonymously next and re-render
         }
         function handleSaveProfile() {
             const name = document.getElementById('profile-name').value;
@@ -558,31 +562,32 @@
         function switchView(view) {
             state.currentView = view;
             
-            // Update nav bar active state
             document.querySelectorAll('.nav-item').forEach(item => {
                 const itemView = item.dataset.view;
-                const baseClasses = 'flex flex-col items-center p-2 text-sm transition-colors duration-200';
                 if (itemView === view) {
-                    let colorClass = 'text-indigo-400'; // Default for home/chart
-                    if (view === 'health') colorClass = 'text-pink-400';
-                    if (view === 'history') colorClass = 'text-teal-400';
-                    item.className = `${baseClasses} font-bold ${colorClass}`;
+                    item.classList.add('font-bold');
+                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-teal-300');
+                    if(view === 'home') item.classList.add('text-indigo-400');
+                    if(view === 'chart') item.classList.add('text-indigo-400');
+                    if(view === 'health') item.classList.add('text-pink-400');
+                    if(view === 'history') item.classList.add('text-teal-400');
                 } else {
-                    let hoverClass = 'hover:text-indigo-300'; // Default for home/chart
-                    if (itemView === 'health') hoverClass = 'hover:text-pink-300';
-                    if (itemView === 'history') hoverClass = 'hover:text-teal-300';
-                    item.className = `${baseClasses} text-gray-400 ${hoverClass}`;
+                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-teal-400', 'font-bold');
+                    item.classList.add('text-gray-400');
+                    if(itemView === 'home') item.classList.add('hover:text-indigo-300');
+                    if(itemView === 'chart') item.classList.add('hover:text-indigo-300');
+                    if(itemView === 'health') item.classList.add('hover:text-pink-300');
+                    if(itemView === 'history') item.classList.add('hover:text-teal-300');
                 }
             });
             renderCurrentView();
         }
         function renderCurrentView() {
             if (!window.isAuthReady || !window.db) {
-                 console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
                  // The initial splash screen will just stay visible if this fails
+                 console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
                  return;
             }
-
             switch (state.currentView) {
                 case 'home':
                     renderHomePage();
@@ -638,21 +643,18 @@
         }
         function getFormFields(formType) {
             const p = state.userProfile;
-            let accentColor = 'indigo';
-            if(formType === 'health') accentColor = 'pink';
-
             return `
                 <div class="space-y-3">
-                    <input type="text" id="${formType}-name" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
-                    <input type="date" id="${formType}-dob" placeholder="Date of Birth" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
-                    <input type="time" id="${formType}-tob" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
-                    <input type="text" id="${formType}-city" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
+                    <input type="text" id="${formType}-name" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="date" id="${formType}-dob" placeholder="Date of Birth" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="time" id="${formType}-tob" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="text" id="${formType}-city" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     ${formType === 'chart' ? `
-                        <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
+                        <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     ` : ''}
-                    <textarea id="${formType}-query" rows="3" placeholder="${formType === 'chart' ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500"></textarea>
+                    <textarea id="${formType}-query" rows="3" placeholder="${formType === 'chart' ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
                 </div>
-                <button type="submit" class="w-full p-3 mt-5 bg-${accentColor}-600 hover:bg-${accentColor}-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
+                <button type="submit" class="w-full p-3 mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
             `;
         }
         function renderChartForm() {
@@ -694,18 +696,7 @@
             state.history.forEach(reading => {
                 const isExpanded = reading.id === historyList.dataset.expandedId;
                 const snippet = reading.content ? reading.content.substring(0, 150) + (reading.content.length > 150 ? '...' : '') : 'No content available.';
-                
-                let title = 'Natal Chart Overview';
-                let titleColor = 'text-indigo-300';
-                if (reading.year) {
-                    title = `Annual Forecast (${reading.year})`;
-                } else if (reading.type === 'health') {
-                    title = 'Health Profile';
-                    titleColor = 'text-pink-300';
-                } else if (reading.title) {
-                    title = reading.title;
-                }
-
+                const title = reading.year ? `Annual Forecast (${reading.year})` : (reading.type === 'health' ? 'Health Profile' : (reading.title || 'Natal Chart Overview'));
                 const subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : (reading.type ? reading.type.toUpperCase() : 'CHART');
                 const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
                 const item = document.createElement('div');
@@ -713,7 +704,7 @@
                 item.innerHTML = `
                     <div class="p-4 flex justify-between items-center" onclick="toggleHistoryExpansion('${reading.id}')">
                         <div>
-                            <p class="font-bold ${titleColor}">${title}</p>
+                            <p class="font-bold text-indigo-300">${title}</p>
                             <p class="text-xs text-gray-400">${subtitle}</p>
                             <p class="text-xs text-gray-500 mt-1">${dateTime}</p>
                         </div>
@@ -757,13 +748,9 @@
         function renderReadingOutput(readingText) {
             const outputDiv = document.getElementById('reading-output');
             if (!outputDiv) return;
-
-            let headerColor = 'text-indigo-400 border-indigo-500/50';
-            if (state.currentReading.type === 'health') headerColor = 'text-pink-400 border-pink-500/50';
-
             outputDiv.innerHTML = `
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl border border-indigo-700/50 space-y-4">
-                    <h3 class="text-2xl font-bold ${headerColor} border-b pb-2">${state.currentReading.title}</h3>
+                    <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${state.currentReading.title}</h3>
                     <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${readingText}</div>
                     <div class="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
                         <h4 class="font-semibold text-indigo-300 mb-3">Ask a Follow-up Question</h4>
