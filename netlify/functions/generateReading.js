@@ -1,4 +1,4 @@
-// This file runs on a serverless platform (Netlify Functions, Vercel Functions, etc.)
+// This file runs on a serverless platform (Netlify Functions, V..."
 // It securely holds the GEMINI_API_KEY and makes the call on behalf of the client.
 
 // IMPORTANT: process.env.GEMINI_API_KEY is retrieved from the Environment Variable 
@@ -24,95 +24,80 @@ exports.handler = async (event, context) => {
 
     // 2. Parse Client Request Data (Security/Validation)
     if (event.httpMethod !== 'POST' || !event.body) {
-        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request method or missing body.' }) };
-    }
-
-    let clientData;
-    try {
-        clientData = JSON.parse(event.body);
-    } catch (e) {
-        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON body.' }) };
+        return { statusCode: 400, body: 'Invalid request method or missing body.' };
     }
 
     try {
-        // --- UPDATED: Now receives Partner 1 and (optionally) Partner 2 ---
-        const { birthDetailsPartner1, birthDetailsPartner2, userQuery, yearInput, readingType, previousReading } = clientData;
+        const clientData = JSON.parse(event.body);
+        const { birthDetails, p2Details, userQuery, yearInput, readingType, previousReading, language } = clientData;
 
-        // *** ROBUSTNESS FIX: Validate required data ***
-        if (!birthDetailsPartner1 || !birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ error: 'Invalid request: Missing required birth details for Partner 1 (dob, tob, city).' })
-            };
-        }
-        
         // 3. Build the System Instruction (The Core Logic - Hidden from Client)
         let systemPrompt = '';
         let userPrompt = '';
-        
-        // *** MARKDOWN BUG FIX ***
-        const formattingRule = "Do not use Markdown, headers, lists, or asterisks for bolding. Respond in plain, natural language paragraphs, separated by a single newline.";
+        const langInstruction = `Respond in ${language === 'hi' ? 'Hindi' : 'English'}.`;
+        const formatInstruction = 'Do not use Markdown, headers, or lists. Respond in plain, natural language paragraphs.'; // <-- MARKDOWN FIX
 
-        // --- UPDATED: Chart String for Partner 1 ---
-        const chartStringP1 = 
-            `\n--- CHART DATA (PARTNER 1) ---\n` +
-            `Name: ${birthDetailsPartner1.name || 'N/A'}\n` +
-            `DOB: ${birthDetailsPartner1.dob}\n` +
-            `TOB: ${birthDetailsPartner1.tob}\n` +
-            `City: ${birthDetailsPartner1.city}\n` +
-            `--- END CHART DATA (PARTNER 1) ---`;
-            
-        let chartStringP2 = '';
-            
-        // --- NEW: Logic for Matching ---
+        // --- Partner 1 Chart String ---
+        // Validate birthDetails before accessing its properties
+        let chartString = '--- CHART DATA (PARTNER 1) ---\n';
+        if (birthDetails && birthDetails.dob && birthDetails.tob && birthDetails.city) {
+            chartString +=
+                `Name: ${birthDetails.name || 'Partner 1'}\n` +
+                `DOB: ${birthDetails.dob}\n` +
+                `TOB: ${birthDetails.tob}\n` +
+                `City: ${birthDetails.city}\n`;
+        } else if (readingType !== 'matching') {
+            // Only throw error if P1 details are missing and it's not a matching report (where P1 is optional)
+             return { statusCode: 400, body: JSON.stringify({ error: 'Invalid Partner 1 birth details.' }) };
+        }
+
+        // --- Partner 2 Chart String (for Matching) ---
         if (readingType === 'matching') {
-            if (!birthDetailsPartner2 || !birthDetailsPartner2.dob || !birthDetailsPartner2.tob || !birthDetailsPartner2.city) {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({ error: 'Invalid request: Missing required birth details for Partner 2 for matching.' })
-                };
+            if (p2Details && p2Details.dob && p2Details.tob && p2Details.city) {
+                chartString +=
+                    `\n--- CHART DATA (PARTNER 2) ---\n` +
+                    `Name: ${p2Details.name || 'Partner 2'}\n` +
+                    `DOB: ${p2Details.dob}\n` +
+                    `TOB: ${p2Details.tob}\n` +
+                    `City: ${p2Details.city}\n`;
+            } else {
+                 return { statusCode: 400, body: JSON.stringify({ error: 'Invalid Partner 2 birth details for matching.' }) };
             }
-            
-            chartStringP2 = 
-                `\n--- CHART DATA (PARTNER 2) ---\n` +
-                `Name: ${birthDetailsPartner2.name || 'N/A'}\n` +
-                `DOB: ${birthDetailsPartner2.dob}\n` +
-                `TOB: ${birthDetailsPartner2.tob}\n` +
-                `City: ${birthDetailsPartner2.city}\n` +
-                `--- END CHART DATA (PARTNER 2) ---`;
+        }
+        chartString += '--- END CHART DATA ---';
 
-            // *** PRO VERSION PROMPT: Reverted to the detailed, high-quality prompt. ***
-            systemPrompt = `You are an expert Vedic astrologer specializing in Kundali Matching (Ashtakoot Milan). Analyze the birth charts of both individuals. Provide a compatibility score (Guna Milan) out of 36. Then, provide a **detailed paragraph for each** of the 8 Kootas (Varna, Vasya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi). Finally, give a **detailed concluding summary** of the match, highlighting strengths, weaknesses, and a final verdict (e.g., Excellent, Good, Average, Challenging). ${formattingRule}`;
-            userPrompt = `Generate a full Kundali matching report for Partner 1 and Partner 2 based on their chart data.`;
-        
-        } else if (readingType === 'health') {
+
+        if (readingType === 'health') {
             // Health System Prompt
-            systemPrompt = `You are a professional medical astrologer. Analyze the provided birth chart data. Focus your response on the native's innate vitality, potential physical strengths and imbalances (especially those related to the 6th house, Sun, and Moon placements), and suggest holistic well-being practices. Be encouraging and focus on preventative care. ${formattingRule}`;
+            systemPrompt = `You are a professional medical astrologer. Analyze the provided birth chart data. Focus your response on the native's innate vitality, potential physical strengths and imbalances (especially those related to the 6th house, Sun, and Moon placements), and suggest holistic well-being practices. Be encouraging and focus on preventative care. ${langInstruction} ${formatInstruction}`;
             userPrompt = `Generate a comprehensive health profile based on this data. Specific health inquiry: ${userQuery || 'N/A'}.`;
+        
+        } else if (readingType === 'matching') {
+            // Kundali Matching System Prompt (Pro Version - Detailed)
+            systemPrompt = `You are an expert Vedic astrologer specializing in Kundali Matching (Ashtakoot Milan). Analyze the birth details of both partners. Provide a Guna Milan score (out of 36) and a detailed paragraph for each of the 8 Kootas (Varna, Vasya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi). Conclude with a detailed final summary paragraph on compatibility, mentioning any major doshas (like Mangal Dosha) and their potential impact. ${langInstruction} ${formatInstruction}`;
+            userPrompt = `Generate a detailed Kundali Matching report for the two partners based on their chart data.`;
         
         } else if (previousReading && userQuery) {
             // Follow-up System Prompt
-            systemPrompt = `You are a highly contextual astrology consultant. The user has provided their original chart data, the full previous reading, and a new follow-up question. Use the full context to provide a focused and detailed answer to their follow-up question. Do not repeat the previous reading content. ${formattingRule}`;
+            systemPrompt = `You are a highly contextual astrology consultant. The user has provided their original chart data, the full previous reading, and a new follow-up question. Use the full context to provide a focused and detailed answer to their follow-up question. Do not repeat the previous reading content. ${langInstruction} ${formatInstruction}`;
             userPrompt = `Based on the following previous reading: "${previousReading}", and the user's natal chart, answer this follow-up question: "${userQuery}".`;
         
         } else if (yearInput) {
             // Annual Forecast System Prompt
-            systemPrompt = `You are an expert annual forecaster specializing in Solar Return charts and major transits. Analyze the natal chart for the year ${yearInput}. Focus on major themes, areas of opportunity (Jupiter/Venus transits), and areas requiring caution (Saturn/Mars transits) for the native during that period. ${formattingRule}`;
+            systemPrompt = `You are an expert annual forecaster specializing in Solar Return charts and major transits. Analyze the natal chart for the year ${yearInput}. Focus on major themes, areas of opportunity (Jupiter/Venus transits), and areas requiring caution (Saturn/Mars transits) for the native during that period. ${langInstruction} ${formatInstruction}`;
             userPrompt = `Generate the annual forecast for the year ${yearInput} based on the chart data.`;
         
         } else {
             // Natal Chart Overview System Prompt (Default)
-            systemPrompt = `You are a world-class, insightful astrologer. Generate a comprehensive Natal Chart Overview, covering the native's sun, moon, and rising sign, along with key planetary aspects that define their personality, career approach, and emotional nature. Keep the tone warm and empowering. ${formattingRule}`;
+            systemPrompt = `You are a world-class, insightful astrologer. Generate a comprehensive Natal Chart Overview, covering the native's sun, moon, and rising sign, along with key planetary aspects that define their personality, career approach, and emotional nature. Keep the tone warm and empowering. ${langInstruction} ${formatInstruction}`;
             userPrompt = `Generate the full natal chart reading. Specific focus if any: ${userQuery || 'N/A'}.`;
         }
 
-        // --- UPDATED: Combine prompts ---
-        userPrompt = userPrompt + chartStringP1 + chartStringP2; // chartStringP2 will be empty unless matching
+        userPrompt = userPrompt + chartString;
 
         // 4. Construct the API Payload
         const payload = {
             contents: [{ parts: [{ text: userPrompt }] }],
-            // We still use Google Search grounding for accurate, up-to-date astrological interpretations
             tools: [{ "google_search": {} }],
             systemInstruction: { parts: [{ text: systemPrompt }] },
         };
@@ -123,13 +108,13 @@ exports.handler = async (event, context) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
+        
         if (!response.ok) {
             const errorBody = await response.text();
             console.error("Gemini API Error:", errorBody);
             return {
                 statusCode: response.status,
-                body: JSON.stringify({ error: `Gemini API Error: ${errorBody}` })
+                body: JSON.stringify({ error: `Gemini API request failed: ${errorBody}` }),
             };
         }
 
@@ -140,11 +125,12 @@ exports.handler = async (event, context) => {
         const generatedText = candidate?.content?.parts?.[0]?.text;
 
         if (!generatedText) {
-             console.error("No text generated, candidate:", candidate);
-             return {
-                statusCode: 500,
-                body: JSON.stringify({ error: 'AI failed to generate content. This might be due to safety settings.' })
-            };
+             console.error("No text in candidate:", JSON.stringify(result, null, 2));
+             // Check for safety blocks
+             if (candidate && candidate.finishReason === 'SAFETY') {
+                 return { statusCode: 400, body: JSON.stringify({ error: 'Response blocked for safety reasons.'}) };
+             }
+             return { statusCode: 500, body: JSON.stringify({ error: 'Could not retrieve AI content from response.'}) };
         }
 
         return {
@@ -158,11 +144,11 @@ exports.handler = async (event, context) => {
             }),
         };
 
-    } catch (error) { 
+    } catch (error) {
         console.error("Proxy error:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Internal server error during AI generation.' }),
+            body: JSON.stringify({ error: 'Internal server error during AI generation. Check proxy function logs.' }),
         };
     }
 };

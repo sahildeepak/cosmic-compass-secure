@@ -30,7 +30,7 @@
             to { transform: rotate(360deg); }
         }
         .animate-spin-slow {
-            animation: spin-slow 2s linear infinite;
+            animation: spin-slow 3s linear infinite;
         }
         /* Enhanced Hero SVG styling */
         .cosmic-hero {
@@ -44,12 +44,19 @@
         <!-- HEADER -->
         <header class="sticky top-0 bg-gray-900 shadow-xl p-4 flex justify-between items-center z-10">
             <h1 class="text-2xl font-extrabold text-indigo-400">Cosmic Compass</h1>
-            <button id="profile-btn" class="text-indigo-300 hover:text-indigo-100 transition duration-150 p-2 rounded-full bg-gray-800" onclick="showProfileModal()">
-                <!-- Moon icon for profile -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
-                    <path d="M12 2a10 10 0 0 0 9.071 5.378 10 10 0 0 1-5.698 12.33 10 10 0 0 0-3.373-1.077c-.504-.085-1.15-.027-1.503.208-.475.313-.604.912-.34 1.488.267.591.956.883 1.57.653A10 10 0 0 0 12 2z"/>
-                </svg>
-            </button>
+            <div class="flex items-center space-x-2">
+                <!-- Language Selector -->
+                <select id="language-selector" class="bg-gray-800 border border-gray-700 text-indigo-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-2">
+                    <option value="en">English</option>
+                    <option value="hi">हिन्दी (Hindi)</option>
+                </select>
+                <!-- Profile Button -->
+                <button id="profile-btn" class="text-indigo-300 hover:text-indigo-100 transition duration-150 p-2 rounded-full bg-gray-800" onclick="showProfileModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
+                        <path d="M12 2a10 10 0 0 0 9.071 5.378 10 10 0 0 1-5.698 12.33 10 10 0 0 0-3.373-1.077c-.504-.085-1.15-.027-1.503.208-.475.313-.604.912-.34 1.488.267.591.956.883 1.57.653A10 10 0 0 0 12 2z"/>
+                    </svg>
+                </button>
+            </div>
         </header>
 
         <!-- MAIN CONTENT AREA -->
@@ -64,41 +71,32 @@
                         <polygon points="50,10 53,50 50,90 47,50" fill="#E0E7FF" transform="rotate(-15, 50, 50)"/>
                     </svg>
                 </div>
-                <p class="text-lg text-gray-300 font-medium animate-pulse">Initializing secure connection...</p>
+                <p class="text-lg text-gray-300 font-medium animate-pulse" data-lang-key="initializing">Initializing secure connection...</p>
             </div>
         </main>
 
         <!-- FIXED BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl border-t border-indigo-700/50 z-20">
             <div class="max-w-md mx-auto flex justify-around items-center h-16">
-                <!-- HOME Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="home" onclick="switchView('home')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span class="mt-1">Home</span>
+                    <span class="mt-1" data-lang-key="nav_home">Home</span>
                 </button>
-                
-                <!-- CHART Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="chart" onclick="switchView('chart')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"/><path d="M12 2v10"/><path d="M18.4 6.6l-2.1 2.1"/><path d="M5.6 6.6l2.1 2.1"/></svg>
-                    <span class="mt-1">Chart</span>
+                    <span class="mt-1" data-lang-key="nav_chart">Chart</span>
                 </button>
-                
-                <!-- HEALTH Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-pink-300" data-view="health" onclick="switchView('health')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M20.5 2L15 6.5l-3-3L2 12l9.5 9.5 3-3L17.5 20l4.5-5.5z"/><path d="M12 12l-7-7"/></svg>
-                    <span class="mt-1">Health</span>
+                    <span class="mt-1" data-lang-key="nav_health">Health</span>
                 </button>
-
-                <!-- KUNDALI MATCHING Button -->
-                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-amber-300" data-view="matching" onclick="switchView('matching')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M14.5 9.5a3.5 3.5 0 0 0 0 7"/><path d="M9.5 9.5a3.5 3.5 0 0 1 0 7"/><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/></svg>
-                    <span class="mt-1">Matching</span>
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-orange-300" data-view="matching" onclick="switchView('matching')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    <span class="mt-1" data-lang-key="nav_matching">Matching</span>
                 </button>
-                
-                <!-- HISTORY Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-teal-300" data-view="history" onclick="switchView('history')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 21a9 9 0 0 0 9-9h-2a7 7 0 0 1-7 7V12h-2V7h2V5H9a9 9 0 0 0-9 9z"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span class="mt-1">History</span>
+                    <span class="mt-1" data-lang-key="nav_history">History</span>
                 </button>
             </div>
         </nav>
@@ -107,21 +105,20 @@
         <div id="modal-container"></div>
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900/70 flex items-center justify-center hidden z-50">
             <div class="flex flex-col items-center p-8 bg-gray-800 rounded-2xl shadow-2xl border border-indigo-500 transform scale-105">
-                <!-- Attractive Loading Indicator -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 animate-spin-slow mb-4">
                     <path d="M12 2a10 10 0 0 0 9.071 5.378 10 10 0 0 1-5.698 12.33 10 10 0 0 0-3.373-1.077c-.504-.085-1.15-.027-1.503.208-.475.313-.604.912-.34 1.488.267.591.956.883 1.57.653A10 10 0 0 0 12 2z"/>
                     <path d="M12 2v20"/><path d="M4.22 4.22l15.56 15.56M4.22 19.78l15.56-15.56"/>
                     <path d="M22 12h-3"/><path d="M5 12h-3"/><path d="M12 5V2"/><path d="M12 22v-3"/>
                 </svg>
-                <p class="mt-3 text-indigo-300 font-semibold text-lg">Generating Cosmic Insight...</p>
+                <p class="mt-3 text-indigo-300 font-semibold text-lg" data-lang-key="loading_generating">Generating Cosmic Insight...</p>
             </div>
         </div>
     </div>
 
     <!-- 
-      *** THE FIX IS HERE ***
-      All JavaScript is now inside ONE single <script type="module"> block.
-      This guarantees Firebase is loaded and ready before any app logic runs.
+      *** ALL SCRIPT LOGIC IS NOW IN THIS SINGLE MODULE ***
+      This fixes the race condition by ensuring Firebase loads and 
+      initializes *before* any app logic (like switchView) runs.
     -->
     <script type="module">
         // --- Firebase SDK Imports ---
@@ -136,9 +133,246 @@
         let userId = null;
         let isAuthReady = false;
         let activeSnapshotUnsubscribe = null;
+        
+        // --- Translation System ---
+        const translations = {
+            en: {
+                initializing: "Initializing secure connection...",
+                nav_home: "Home",
+                nav_chart: "Chart",
+                nav_health: "Health",
+                nav_matching: "Matching",
+                nav_history: "History",
+                loading_generating: "Generating Cosmic Insight...",
+                modal_loading: "Loading",
+                modal_connecting: "Please wait while we connect to the server...",
+                modal_success: "Success",
+                modal_error: "Error",
+                modal_profile_saved: "Your default birth details have been saved!",
+                modal_profile_auth_wait: "Please wait for authentication to complete.",
+                modal_profile_auth_error: "Failed to save profile. Please check console for details.",
+                modal_delete_disabled: "Deleting history items is disabled to maintain code stability.",
+                modal_ai_fail: "There was an error generating the reading: {error}. Please check your Netlify logs and Gemini API Key.",
+                modal_input_required: "Input Required",
+                modal_follow_up_missing: "Please type your follow-up question.",
+                modal_context_missing: "Original reading context is missing.",
+                modal_validation_error: "Validation Error",
+                modal_validation_details: "Date of Birth, Time of Birth, and City are required.",
+                modal_validation_partner1: "Please fill in all details for Partner 1.",
+                modal_validation_partner2: "Please fill in all details for Partner 2.",
+                auth_profile_title: "User Profile & Auth",
+                auth_signed_in_as: "Signed in as:",
+                auth_permanent_user: "Permanent User",
+                auth_user_id: "User ID:",
+                auth_sign_out: "Sign Out",
+                auth_anonymous_user: "Anonymous User",
+                auth_anonymous_desc: "Your history is currently saved locally. Sign in or Sign up below to save your data permanently!",
+                auth_sign_in: "Sign In",
+                auth_new_account: "New Account",
+                auth_email: "Email",
+                auth_password: "Password (6+ chars)",
+                auth_sign_up: "Sign Up",
+                auth_validation_fail: "Please enter a valid email and a password of at least 6 characters.",
+                auth_success_signin: "Welcome Back! Successfully signed in as {email}.",
+                auth_success_signup: "Account Created! Successfully created and signed in as {email}.",
+                auth_fail: "Authentication Failed.",
+                auth_fail_error: "Error: {error}",
+                auth_signed_out: "Signed Out",
+                auth_signed_out_desc: "You have been signed out. You are now an anonymous user.",
+                profile_title: "Default Birth Details",
+                profile_name: "Name",
+                profile_dob: "Date of Birth",
+                profile_tob: "Time of Birth",
+                profile_city: "City/Location",
+                profile_save: "Save Default Details",
+                home_welcome: "Welcome to Cosmic Compass",
+                home_desc: "Cosmic Compass provides personalized astrological insights powered by advanced analysis.",
+                home_free: "⭐ This is a completely FREE service! ⭐",
+                home_explore_title: "What you can explore:",
+                home_explore_chart: "Comprehensive natal chart, annual forecasts, and specific life queries.",
+                home_explore_health: "Astrological insights into your vitality, strengths, and holistic well-being.",
+                home_explore_matching: "Detailed Kundali Matching (Ashtakoot Milan) to check compatibility.",
+                home_explore_history: "Save and review your personalized readings (automatically saved to your private cloud history).",
+                chart_title: "Natal Chart & Forecast",
+                chart_desc: "Enter your birth details to receive a comprehensive analysis, annual forecast, or a specific query response.",
+                chart_name_placeholder: "Name (e.g., Jane Doe)",
+                chart_dob_placeholder: "Date of Birth",
+                chart_tob_placeholder: "Time of Birth",
+                chart_city_placeholder: "City (e.g., New York, NY)",
+                chart_year_placeholder: "Annual Forecast Year (Optional)",
+                chart_year_desc: "Focuses on major transits for the year.",
+                chart_query_placeholder: "Specific Question (e.g., How will my career look next month?) - OPTIONAL",
+                chart_query_desc: "Overrides Annual Prediction for a custom analysis.",
+                chart_button: "Generate Reading",
+                health_title: "Holistic Health Profile",
+                health_desc: "Get an astrological perspective on your vitality, strengths, and areas for preventative care.",
+                health_query_placeholder: "Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL",
+                health_query_desc: "The AI will focus its analysis on this area.",
+                health_button: "Generate Health Profile",
+                matching_title: "Kundali Matching (Compatibility)",
+                matching_desc: "Enter the birth details for two people to generate a Kundali Matching (Ashtakoot Milan) report.",
+                matching_p1_title: "Partner 1 (Your Details)",
+                matching_p1_desc: "Your saved profile details are loaded here.",
+                matching_p2_title: "Partner 2 Details",
+                matching_p2_desc: "Enter the second person's birth details.",
+                matching_button: "Generate Compatibility Report",
+                history_title: "Reading History",
+                history_desc: "Your personal archive of cosmic insights.",
+                history_user_id: "User ID:",
+                history_empty: "No readings saved yet. Generate one now!",
+                history_reading_title: "Reading:",
+                history_followup_title: "Follow-up: {question}",
+                history_delete_button: "Delete History Item",
+                output_followup_title: "Ask a Follow-up Question",
+                output_followup_placeholder: "Ask a specific question based on the reading above...",
+                output_followup_button: "Get Follow-up Answer",
+                output_followup_question: "Your Question:",
+                output_followup_response: "AI Response:",
+                reading_title_health: "Holistic Health Profile",
+                reading_title_forecast: "Annual Forecast ({year})",
+                reading_title_query: "Targeted Chart Query",
+                reading_title_natal: "Comprehensive Natal Chart Overview",
+                reading_title_matching: "Kundali Matching Report",
+                reading_subtitle_query: "Query: {query}",
+                reading_subtitle_type: "{type}",
+                reading_details: "Birth Details:",
+                reading_details_p1: "Partner 1 Details:",
+                reading_details_p2: "Partner 2 Details:",
+                reading_details_name: "Name: {name}",
+                reading_details_dob: "DOB: {dob}",
+                reading_details_tob: "TOB: {tob}",
+                reading_details_city: "City: {city}",
+                auth_error_anon_fail: "Error: Could not authenticate with server. Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.",
+                auth_error_config_missing: "Error: Firebase configuration is missing. The app cannot start. Please paste your Firebase project config into the `index.html` file.",
+            },
+            hi: {
+                initializing: "सुरक्षित कनेक्शन प्रारंभ किया जा रहा है...",
+                nav_home: "मुख",
+                nav_chart: "चार्ट",
+                nav_health: "स्वास्थ्य",
+                nav_matching: "मिलान",
+                nav_history: "इतिहास",
+                loading_generating: "ब्रह्मांडीय अंतर्दृष्टि उत्पन्न हो रही है...",
+                modal_loading: "लोड हो रहा है",
+                modal_connecting: "कृपया सर्वर से कनेक्ट होने तक प्रतीक्षा करें...",
+                modal_success: "सफलता",
+                modal_error: "त्रुटि",
+                modal_profile_saved: "आपके डिफ़ॉल्ट जन्म विवरण सहेज लिए गए हैं!",
+                modal_profile_auth_wait: "कृपया प्रमाणीकरण पूरा होने तक प्रतीक्षा करें।",
+                modal_profile_auth_error: "प्रोफ़ाइल सहेजने में विफल। कृपया कंसोल जांचें।",
+                modal_delete_disabled: "स्थिरता बनाए रखने के लिए इतिहास आइटम हटाना अक्षम है।",
+                modal_ai_fail: "रीडिंग उत्पन्न करने में एक त्रुटि हुई: {error}। कृपया अपने नेटलिफाई लॉग और जेमिनी एपीआई कुंजी की जांच करें।",
+                modal_input_required: "इनपुट आवश्यक है",
+                modal_follow_up_missing: "कृपया अपना अनुवर्ती प्रश्न टाइप करें।",
+                modal_context_missing: "मूल रीडिंग संदर्भ गायब है।",
+                modal_validation_error: "सत्यापन त्रुटि",
+                modal_validation_details: "जन्म तिथि, जन्म समय और शहर आवश्यक हैं।",
+                modal_validation_partner1: "कृपया साथी 1 के लिए सभी विवरण भरें।",
+                modal_validation_partner2: "कृपया साथी 2 के लिए सभी विवरण भरें।",
+                auth_profile_title: "उपयोगकर्ता प्रोफ़ाइल और प्रामाणिकता",
+                auth_signed_in_as: "इस रूप में साइन इन हैं:",
+                auth_permanent_user: "स्थायी उपयोगकर्ता",
+                auth_user_id: "उपयोगकर्ता आईडी:",
+                auth_sign_out: "साइन आउट",
+                auth_anonymous_user: "अज्ञात उपयोगकर्ता",
+                auth_anonymous_desc: "आपका इतिहास वर्तमान में स्थानीय रूप से सहेजा गया है। अपना डेटा स्थायी रूप से सहेजने के लिए नीचे साइन इन या साइन अप करें!",
+                auth_sign_in: "साइन इन",
+                auth_new_account: "नया खाता",
+                auth_email: "ईमेल",
+                auth_password: "पासवर्ड (6+ अक्षर)",
+                auth_sign_up: "साइन अप",
+                auth_validation_fail: "कृपया एक मान्य ईमेल और कम से कम 6 अक्षरों का पासवर्ड दर्ज करें।",
+                auth_success_signin: "वापसी पर स्वागत है! {email} के रूप में सफलतापूर्वक साइन इन किया।",
+                auth_success_signup: "खाता बन गया! {email} के रूप में सफलतापूर्वक बनाया और साइन इन किया।",
+                auth_fail: "प्रमाणीकरण विफल",
+                auth_fail_error: "त्रुटि: {error}",
+                auth_signed_out: "साइन आउट",
+                auth_signed_out_desc: "आप साइन आउट हो गए हैं। अब आप एक अज्ञात उपयोगकर्ता हैं।",
+                profile_title: "डिफ़ॉल्ट जन्म विवरण",
+                profile_name: "नाम",
+                profile_dob: "जन्म तिथि",
+                profile_tob: "जन्म समय",
+                profile_city: "शहर/स्थान",
+                profile_save: "डिफ़ॉल्ट विवरण सहेजें",
+                home_welcome: "कॉस्मिक कम्पास में आपका स्वागत है",
+                home_desc: "कॉस्मिक कम्पास उन्नत विश्लेषण द्वारा संचालित व्यक्तिगत ज्योतिषीय अंतर्दृष्टि प्रदान करता है।",
+                home_free: "⭐ यह एक पूरी तरह से मुफ़्त सेवा है! ⭐",
+                home_explore_title: "आप क्या खोज सकते हैं:",
+                home_explore_chart: "व्यापक जन्म चार्ट, वार्षिक पूर्वानुमान, और विशिष्ट जीवन प्रश्न।",
+                home_explore_health: "आपकी जीवन शक्ति, शक्तियों और समग्र कल्याण में ज्योतिषीय अंतर्दृष्टि।",
+                home_explore_matching: "संगतता की जांच के लिए विस्तृत कुंडली मिलान (अष्टकूट मिलान)।",
+                home_explore_history: "अपनी व्यक्तिगत रीडिंग सहेजें और समीक्षा करें (स्वचालित रूप से आपके निजी क्लाउड इतिहास में सहेजा गया)।",
+                chart_title: "जन्म चार्ट और पूर्वानुमान",
+                chart_desc: "एक व्यापक विश्लेषण, वार्षिक पूर्वानुमान, या एक विशिष्ट प्रश्न प्रतिक्रिया प्राप्त करने के लिए अपना जन्म विवरण दर्ज करें।",
+                chart_name_placeholder: "नाम (जैसे, जेन डो)",
+                chart_dob_placeholder: "जन्म तिथि",
+                chart_tob_placeholder: "जन्म समय",
+                chart_city_placeholder: "शहर (जैसे, न्यूयॉर्क, एनवाई)",
+                chart_year_placeholder: "वार्षिक पूर्वानुमान वर्ष (वैकल्पिक)",
+                chart_year_desc: "वर्ष के लिए प्रमुख पारगमन पर केंद्रित है।",
+                chart_query_placeholder: "विशिष्ट प्रश्न (जैसे, अगले महीने मेरा करियर कैसा दिखेगा?) - वैकल्पिक",
+                chart_query_desc: "एक कस्टम विश्लेषण के लिए वार्षिक भविष्यवाणी को ओवरराइड करता है।",
+                chart_button: "रीडिंग उत्पन्न करें",
+                health_title: "समग्र स्वास्थ्य प्रोफ़ाइल",
+                health_desc: "अपनी जीवन शक्ति, शक्तियों और निवारक देखभाल के क्षेत्रों पर ज्योतिषीय परिप्रेक्ष्य प्राप्त करें।",
+                health_query_placeholder: "विशिष्ट स्वास्थ्य जांच (जैसे, मेरे जोड़ों और ऊर्जा स्तरों पर ध्यान केंद्रित करें) - वैकल्पिक",
+                health_query_desc: "एआई इस क्षेत्र पर अपने विश्लेषण पर ध्यान केंद्रित करेगा।",
+                health_button: "स्वास्थ्य प्रोफ़ाइल उत्पन्न करें",
+                matching_title: "कुंडली मिलान (संगतता)",
+                matching_desc: "कुंडली मिलान (अष्टकूट मिलान) रिपोर्ट तैयार करने के लिए दो लोगों के जन्म विवरण दर्ज करें।",
+                matching_p1_title: "साथी 1 (आपका विवरण)",
+                matching_p1_desc: "आपके सहेजे गए प्रोफ़ाइल विवरण यहाँ लोड किए गए हैं।",
+                matching_p2_title: "साथी 2 विवरण",
+                matching_p2_desc: "दूसरे व्यक्ति का जन्म विवरण दर्ज करें।",
+                matching_button: "संगतता रिपोर्ट उत्पन्न करें",
+                history_title: "रीडिंग इतिहास",
+                history_desc: "ब्रह्मांडीय अंतर्दृष्टि का आपका व्यक्तिगत संग्रह।",
+                history_user_id: "उपयोगकर्ता आईडी:",
+                history_empty: "अभी तक कोई रीडिंग सहेजी नहीं गई है। अभी एक उत्पन्न करें!",
+                history_reading_title: "रीडिंग:",
+                history_followup_title: "अनुवर्ती: {question}",
+                history_delete_button: "इतिहास आइटम हटाएं",
+                output_followup_title: "एक अनुवर्ती प्रश्न पूछें",
+                output_followup_placeholder: "ऊपर दी गई रीडिंग के आधार पर एक विशिष्ट प्रश्न पूछें...",
+                output_followup_button: "अनुवर्ती उत्तर प्राप्त करें",
+                output_followup_question: "आपका सवाल:",
+                output_followup_response: "एआई प्रतिक्रिया:",
+                reading_title_health: "समग्र स्वास्थ्य प्रोफ़ाइल",
+                reading_title_forecast: "वार्षिक पूर्वानुमान ({year})",
+                reading_title_query: "लक्षित चार्ट क्वेरी",
+                reading_title_natal: "व्यापक जन्म चार्ट अवलोकन",
+                reading_title_matching: "कुंडली मिलान रिपोर्ट",
+                reading_subtitle_query: "क्वेरी: {query}",
+                reading_subtitle_type: "{type}",
+                reading_details: "जन्म विवरण:",
+                reading_details_p1: "साथी 1 विवरण:",
+                reading_details_p2: "साथी 2 विवरण:",
+                reading_details_name: "नाम: {name}",
+                reading_details_dob: "जन्म तिथि: {dob}",
+                reading_details_tob: "जन्म समय: {tob}",
+                reading_details_city: "शहर: {city}",
+                auth_error_anon_fail: "त्रुटि: सर्वर से प्रमाणित नहीं हो सका। कृपया सुनिश्चित करें कि आपके फायरबेस प्रोजेक्ट की प्रमाणीकरण सेटिंग्स में **अज्ञात साइन-इन** सक्षम है।",
+                auth_error_config_missing: "त्रुटि: फायरबेस कॉन्फ़िगरेशन गायब है। ऐप शुरू नहीं हो सकता। कृपया अपनी फायरबेस प्रोजेक्ट कॉन्फिग को `index.html` फ़ाइल में पेस्ट करें।",
+            }
+        };
+
+        let currentLanguage = 'en';
+
+        function translateUI(lang) {
+            currentLanguage = lang;
+            document.querySelectorAll('[data-lang-key]').forEach(el => {
+                const key = el.dataset.langKey;
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+            // Also translate dynamic placeholder text
+            renderCurrentView();
+        }
+
 
         // --- GLOBAL APP STATE ---
-        let state = {
+        state = {
             currentView: 'home', // Default view is 'home'
             userProfile: {
                 name: '',
@@ -152,11 +386,23 @@
         };
 
         // --- UTILITY FUNCTIONS ---
-        function showLoading(show) {
-            document.getElementById('loading-overlay').classList.toggle('hidden', !show);
+
+        function t(key, params = {}) {
+            let text = translations[currentLanguage][key] || translations['en'][key] || key;
+            if (params) {
+                Object.keys(params).forEach(paramKey => {
+                    text = text.replace(`{${paramKey}}`, params[paramKey]);
+                });
+            }
+            return text;
         }
 
-        function showModal(title, content, type = 'info') {
+        function showLoading(show) {
+            document.getElementById('loading-overlay').classList.toggle('hidden', !show);
+            document.querySelector('#loading-overlay p').textContent = t('loading_generating');
+        }
+
+        function showModal(titleKey, contentKey, type = 'info', contentParams = {}) {
             if (state.modalOpen) return; 
             
             const modalContainer = document.getElementById('modal-container');
@@ -165,34 +411,15 @@
 
             modalContainer.innerHTML = `
                 <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onclick="closeModal()">
-                    <!-- MODAL SCROLL FIX: Added max-h-screen, flex-col, and overflow-y-auto to content -->
-                    <div class="w-11/12 max-w-sm p-6 rounded-xl shadow-2xl ${color} border flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
-                        <h3 class="text-xl font-bold mb-4 ${titleColor} flex-shrink-0">${title}</h3>
-                        <div class="text-sm text-gray-300 overflow-y-auto mb-4 flex-grow">${content}</div>
-                        <button class="mt-auto w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200 flex-shrink-0" onclick="closeModal()">Close</button>
+                    <div class="w-11/12 max-w-sm p-6 rounded-xl shadow-2xl ${color} border flex flex-col" style="max-height: 90vh;" onclick="event.stopPropagation()">
+                        <h3 class="text-xl font-bold mb-4 ${titleColor}">${t(titleKey)}</h3>
+                        <div class="text-sm text-gray-300 overflow-y-auto">${t(contentKey, contentParams)}</div>
+                        <button class="mt-6 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200" onclick="closeModal()">Close</button>
                     </div>
                 </div>
             `;
             state.modalOpen = true;
         }
-        
-        // Make functions globally accessible for inline onclick="" handlers
-        window.closeModal = () => {
-            document.getElementById('modal-container').innerHTML = '';
-            state.modalOpen = false;
-        };
-        window.showProfileModal = showProfileModal;
-        window.switchView = switchView;
-        window.handleAuth = handleAuth;
-        window.handleSignOut = handleSignOut;
-        window.handleSaveProfile = handleSaveProfile;
-        window.toggleHistoryExpansion = toggleHistoryExpansion;
-        window.deleteReading = deleteReading;
-        window.handleFollowUp = handleFollowUp;
-        window.handleChartSubmit = handleChartSubmit;
-        window.handleHealthSubmit = handleHealthSubmit;
-        window.handleMatchingSubmit = handleMatchingSubmit; // Added for matching
-
 
         // --- FIREBASE / DATA MANAGEMENT ---
         async function loadUserProfile() {
@@ -222,7 +449,7 @@
 
         async function saveUserProfile(details) {
             if (!userId || !db) {
-                showModal('Error', 'Please wait for authentication to complete.', 'error');
+                showModal('modal_error', 'modal_profile_auth_wait', 'error');
                 return;
             }
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -230,11 +457,11 @@
             try {
                 await setDoc(profileRef, details, { merge: true });
                 state.userProfile = details;
-                showModal('Success', 'Your default birth details have been saved! Your readings will auto-fill with this data.', 'info');
+                showModal('modal_success', 'modal_profile_saved');
                 renderCurrentView(); 
             } catch (e) {
                 console.error("Error saving profile:", e);
-                showModal('Error', 'Failed to save profile. Please check console for details.', 'error');
+                showModal('modal_error', 'modal_profile_auth_error', 'error');
             }
         }
         
@@ -290,22 +517,31 @@
                 console.log("Reading deleted.");
              } catch (e) {
                 console.error("Error deleting reading:", e);
-                showModal('Error', 'Could not delete reading.', 'error');
+                showModal('modal_error', 'Could not delete reading.', 'error');
              }
         }
         
         // --- GEMINI API COMMUNICATION (SECURE PROXY) ---
 
-        async function generateReading(payload, readingData) {
+        async function generateReading(birthDetails, userQuery, yearInput, readingType, previousReading = null, readingData, p2Details = null) {
             showLoading(true);
             
             const apiUrl = '/.netlify/functions/generateReading'; 
+            const payload = {
+                birthDetails,
+                p2Details, // Add partner 2 details
+                userQuery,
+                yearInput,
+                readingType,
+                previousReading,
+                language: currentLanguage // Pass the selected language
+            };
 
             try {
                 let response = null;
                 let maxRetries = 3;
                 let delay = 1000;
-                let errorText = 'Proxy request failed after retries.'; // Default error
+                let errorText = 'Proxy request failed after retries.';
 
                 for (let i = 0; i < maxRetries; i++) {
                     response = await fetch(apiUrl, {
@@ -314,55 +550,54 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (response.ok) break; // Success, exit the loop
+                    if (response.ok) break; 
 
-                    // If not ok, handle errors
                     if (response.status === 429 && i < maxRetries - 1) { 
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
-                        continue; // Retry
+                        continue; 
                     }
                     
-                    // --- ROBUST ERROR HANDLING FIX ---
                     errorText = `Proxy request failed with status: ${response.status}`;
                     try {
-                        const rawError = await response.text(); // Read the body as text ONCE
+                        const rawError = await response.text(); 
                         try {
                             const errorResult = JSON.parse(rawError);
                             errorText = errorResult.error || rawError;
                         } catch (e) {
-                            errorText = rawError; // Use the raw text if it's not JSON
+                            errorText = rawError; 
                         }
                     } catch (e) {
                         console.error("Could not read error response body:", e);
                     }
-                    // We throw here to be caught by the final catch block
                     throw new Error(errorText); 
                 }
 
-                // This check is for if the loop finishes without success
                 if (!response.ok) {
                     throw new Error(errorText);
                 }
 
-                // --- Success Path ---
-                const result = await response.json(); // This is now safe, body was not read
+                const result = await response.json(); 
                 
                 if (result.error) {
                     throw new Error(result.error);
                 }
 
-                if (payload.readingType !== 'followup') {
+                if (!previousReading) {
                     state.currentReading = {
-                        ...readingData,
+                        title: readingData.title,
+                        birthDetails: birthDetails,
+                        p2Details: p2Details,
                         content: result.text,
+                        type: readingType,
+                        year: yearInput
                     };
                 }
                 
                 return result.text;
             } catch (error) {
                 console.error("AI Generation Error:", error);
-                showModal('AI Generation Failed', `There was an error generating the reading: ${error.message}. Please check your Netlify logs and Gemini API Key.`, 'error');
+                showModal('modal_error', 'modal_ai_fail', 'error', { error: error.message });
                 return null;
             } finally {
                 showLoading(false);
@@ -372,38 +607,38 @@
         // --- AUTH/PROFILE MODAL LOGIC ---
         function showProfileModal(requireAuth = false) {
             if (!isAuthReady) {
-                showModal('Loading', 'Please wait while we connect to the server...', 'info');
+                showModal('modal_loading', 'modal_connecting', 'info');
                 return;
             }
             const isAuthenticated = auth.currentUser && !auth.currentUser.isAnonymous;
             const profileContent = `
                 ${isAuthenticated ? `
                     <div class="mb-4 text-sm">
-                        <p class="font-semibold text-indigo-300">Signed in as:</p>
-                        <p class="text-gray-300 break-words">${auth.currentUser.email || 'Permanent User'}</p>
-                        <p class="text-xs text-gray-500 mt-1">User ID: ${userId}</p>
+                        <p class="font-semibold text-indigo-300" data-lang-key="auth_signed_in_as">${t('auth_signed_in_as')}</p>
+                        <p class="text-gray-300 break-words">${auth.currentUser.email || t('auth_permanent_user')}</p>
+                        <p class="text-xs text-gray-500 mt-1" data-lang-key="auth_user_id">${t('auth_user_id')} ${userId}</p>
                     </div>
                     ${renderProfileForm()}
-                    <button class="mt-4 w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200" onclick="handleSignOut()">Sign Out</button>
+                    <button class="mt-4 w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200" onclick="handleSignOut()" data-lang-key="auth_sign_out">${t('auth_sign_out')}</button>
                 ` : `
                     <div class="text-center mb-6 p-4 bg-yellow-900/50 rounded-lg border border-yellow-700">
-                        <p class="font-bold text-yellow-300 mb-2">Anonymous User</p>
-                        <p class="text-sm text-yellow-200">Your history is currently saved locally. Sign in or Sign up below to save your data permanently!</p>
+                        <p class="font-bold text-yellow-300 mb-2" data-lang-key="auth_anonymous_user">${t('auth_anonymous_user')}</p>
+                        <p class="text-sm text-yellow-200" data-lang-key="auth_anonymous_desc">${t('auth_anonymous_desc')}</p>
                     </div>
                     ${renderAuthForm(true)}
                     <p class="text-center text-sm my-3 text-gray-400">- OR -</p>
                     ${renderAuthForm(false)}
                 `}
             `;
-            showModal('User Profile & Auth', profileContent, 'info');
+            showModal('auth_profile_title', profileContent, 'info');
         }
         function renderAuthForm(isSignIn) {
             return `
                 <form id="${isSignIn ? 'sign-in' : 'sign-up'}-form" class="space-y-3 p-4 border border-indigo-700/50 rounded-xl bg-gray-900/50 mb-4">
-                    <h4 class="text-lg font-bold text-indigo-200">${isSignIn ? 'Sign In' : 'New Account'}</h4>
-                    <input type="email" id="${isSignIn ? 'sign-in' : 'sign-up'}-email" placeholder="Email" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="password" id="${isSignIn ? 'sign-in' : 'sign-up'}-password" placeholder="Password (6+ chars)" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleAuth(${isSignIn})">${isSignIn ? 'Sign In' : 'Sign Up'}</button>
+                    <h4 class="text-lg font-bold text-indigo-200" data-lang-key="${isSignIn ? 'auth_sign_in' : 'auth_new_account'}">${t(isSignIn ? 'auth_sign_in' : 'auth_new_account')}</h4>
+                    <input type="email" id="${isSignIn ? 'sign-in' : 'sign-up'}-email" placeholder="${t('auth_email')}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="password" id="${isSignIn ? 'sign-in' : 'sign-up'}-password" placeholder="${t('auth_password')}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <button type="submit" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleAuth(${isSignIn})" data-lang-key="${isSignIn ? 'auth_sign_in' : 'auth_sign_up'}">${t(isSignIn ? 'auth_sign_in' : 'auth_sign_up')}</button>
                 </form>
             `;
         }
@@ -411,12 +646,12 @@
             const p = state.userProfile;
             return `
                 <form id="profile-form" class="space-y-3 p-4 border border-indigo-700/50 rounded-xl bg-gray-900/50">
-                    <h4 class="text-lg font-bold text-indigo-200">Default Birth Details</h4>
-                    <input type="text" id="profile-name" placeholder="Name" value="${p.name}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="date" id="profile-dob" placeholder="Date of Birth" value="${p.dob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="time" id="profile-tob" placeholder="Time of Birth" value="${p.tob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="text" id="profile-city" placeholder="City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleSaveProfile()">Save Default Details</button>
+                    <h4 class="text-lg font-bold text-indigo-200" data-lang-key="profile_title">${t('profile_title')}</h4>
+                    <input type="text" id="profile-name" placeholder="${t('profile_name')}" value="${p.name}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="date" id="profile-dob" placeholder="${t('profile_dob')}" value="${p.dob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="time" id="profile-tob" placeholder="${t('profile_tob')}" value="${p.tob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="text" id="profile-city" placeholder="${t('profile_city')}" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleSaveProfile()" data-lang-key="profile_save">${t('profile_save')}</button>
                 </form>
             `;
         }
@@ -425,25 +660,25 @@
             const email = document.getElementById(`${formId}-email`).value;
             const password = document.getElementById(`${formId}-password`).value;
             if (!email || password.length < 6) {
-                showModal('Error', 'Please enter a valid email and a password of at least 6 characters.', 'error');
+                showModal('modal_error', 'auth_validation_fail', 'error');
                 return;
             }
             try {
                 showLoading(true);
                 if (isSignIn) {
                     await signInWithEmailAndPassword(auth, email, password);
-                    showModal('Welcome Back!', `Successfully signed in as ${email}.`, 'info');
+                    showModal('modal_success', 'auth_success_signin', 'info', {email: email});
                 } else {
                     await createUserWithEmailAndPassword(auth, email, password);
-                    showModal('Account Created!', `Successfully created and signed in as ${email}.`, 'info');
+                    showModal('modal_success', 'auth_success_signup', 'info', {email: email});
                 }
                 closeModal(); 
             } catch (error) {
-                let errorMessage = 'Authentication Failed.';
+                let errorMessage = t('auth_fail');
                 if (error.code) {
-                    errorMessage = `Error: ${error.code.replace('auth/', '').replace(/-/g, ' ').toUpperCase()}`;
+                    errorMessage = t('auth_fail_error', {error: error.code.replace('auth/', '').replace(/-/g, ' ').toUpperCase()});
                 }
-                showModal('Authentication Error', errorMessage, 'error');
+                showModal('modal_error', errorMessage, 'error');
             } finally {
                 showLoading(false);
             }
@@ -451,7 +686,7 @@
         async function handleSignOut() {
             await signOut(auth);
             state.userProfile = { name: '', dob: '', tob: '', city: '' }; 
-            showModal('Signed Out', 'You have been signed out. You are now an anonymous user.', 'info');
+            showModal('auth_signed_out', 'auth_signed_out_desc');
             // Auth listener will handle signing in anonymously next and re-render
         }
         function handleSaveProfile() {
@@ -460,7 +695,7 @@
             const tob = document.getElementById('profile-tob').value;
             const city = document.getElementById('profile-city').value;
             if (!dob || !tob || !city) {
-                showModal('Validation Error', 'Date of Birth, Time of Birth, and City are required to save your profile.', 'error');
+                showModal('modal_validation_error', 'modal_validation_details', 'error');
                 return;
             }
             const details = { name, dob, tob, city };
@@ -475,19 +710,19 @@
                 const itemView = item.dataset.view;
                 if (itemView === view) {
                     item.classList.add('font-bold');
-                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-amber-300', 'hover:text-teal-300');
+                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-teal-300', 'hover:text-orange-300');
                     if(view === 'home') item.classList.add('text-indigo-400');
                     if(view === 'chart') item.classList.add('text-indigo-400');
                     if(view === 'health') item.classList.add('text-pink-400');
-                    if(view === 'matching') item.classList.add('text-amber-400');
+                    if(view === 'matching') item.classList.add('text-orange-400');
                     if(view === 'history') item.classList.add('text-teal-400');
                 } else {
-                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-amber-400', 'text-teal-400', 'font-bold');
+                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-teal-400', 'text-orange-400', 'font-bold');
                     item.classList.add('text-gray-400');
                     if(itemView === 'home') item.classList.add('hover:text-indigo-300');
                     if(itemView === 'chart') item.classList.add('hover:text-indigo-300');
                     if(itemView === 'health') item.classList.add('hover:text-pink-300');
-                    if(itemView === 'matching') item.classList.add('hover:text-amber-300');
+                    if(itemView === 'matching') item.classList.add('hover:text-orange-300');
                     if(itemView === 'history') item.classList.add('hover:text-teal-300');
                 }
             });
@@ -495,7 +730,6 @@
         }
         function renderCurrentView() {
             if (!isAuthReady || !db) {
-                 // The initial splash screen will just stay visible if this fails
                  console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
                  return;
             }
@@ -521,7 +755,7 @@
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <div class="text-center p-6 space-y-8">
-                    <h2 class="text-4xl font-extrabold text-indigo-300">Welcome to Cosmic Compass</h2>
+                    <h2 class="text-4xl font-extrabold text-indigo-300" data-lang-key="home_welcome">${t('home_welcome')}</h2>
                     <div class="cosmic-hero mx-auto w-56 h-56 relative">
                         <svg viewBox="0 0 100 100" class="w-full h-full">
                             <circle cx="50" cy="50" r="45" fill="none" stroke="#3730A3" stroke-width="1"/>
@@ -541,52 +775,53 @@
                         </svg>
                     </div>
                     <div class="space-y-4">
-                        <p class="text-lg text-gray-300 font-medium">Cosmic Compass provides personalized astrological insights powered by advanced analysis.</p>
-                        <p class="text-xl font-bold text-green-400">⭐ This is a completely FREE service! ⭐</p>
+                        <p class="text-lg text-gray-300 font-medium" data-lang-key="home_desc">${t('home_desc')}</p>
+                        <p class="text-xl font-bold text-green-400" data-lang-key="home_free">${t('home_free')}</p>
                         <div class="p-4 bg-gray-800 rounded-xl text-left space-y-3 border border-indigo-700/50">
-                            <h3 class="text-xl font-semibold text-indigo-400">What you can explore:</h3>
+                            <h3 class="text-xl font-semibold text-indigo-400" data-lang-key="home_explore_title">${t('home_explore_title')}</h3>
                             <ul class="text-gray-300 space-y-2">
-                                <li class="flex items-center"><span class="text-indigo-400 mr-3">Chart:</span> Comprehensive natal chart, annual forecasts, and specific life queries.</li>
-                                <li class="flex items-center"><span class="text-pink-400 mr-3">Health:</span> Astrological insights into your vitality, strengths, and holistic well-being.</li>
-                                <li class="flex items-center"><span class="text-amber-400 mr-3">Matching:</span> Detailed Kundali matching (Ashtakoot Milan) for compatibility.</li>
-                                <li class="flex items-center"><span class="text-teal-400 mr-3">History:</span> Save and review your personalized readings (automatically saved to your private cloud history).</li>
+                                <li class="flex items-center"><span class="text-indigo-400 mr-3" data-lang-key="nav_chart">${t('nav_chart')}:</span> <span data-lang-key="home_explore_chart">${t('home_explore_chart')}</span></li>
+                                <li class="flex items-center"><span class="text-pink-400 mr-3" data-lang-key="nav_health">${t('nav_health')}:</span> <span data-lang-key="home_explore_health">${t('home_explore_health')}</span></li>
+                                <li class="flex items-center"><span class="text-orange-400 mr-3" data-lang-key="nav_matching">${t('nav_matching')}:</span> <span data-lang-key="home_explore_matching">${t('home_explore_matching')}</span></li>
+                                <li class="flex items-center"><span class="text-teal-400 mr-3" data-lang-key="nav_history">${t('nav_history')}:</span> <span data-lang-key="home_explore_history">${t('home_explore_history')}</span></li>
                             </ul>
                         </div>
                     </div>
                 </div>
             `;
         }
-        function getFormFields(formType, partnerSuffix = '') {
-            // Use partner1's profile data ONLY for the partner1 form
-            const p = (formType === 'matching' && partnerSuffix === '1') ? state.userProfile : { name: '', dob: '', tob: '', city: '' };
-            
-            // Don't show these fields for partner 2
-            const showAdvancedFields = (formType === 'chart' && partnerSuffix === '') || (formType === 'health' && partnerSuffix === '');
-            
+        function getFormFields(formType, partnerId = '') {
+            const p = (partnerId === 'p1' || (partnerId === '' && formType !== 'matching')) ? state.userProfile : { name: '', dob: '', tob: '', city: '' };
+            const idPrefix = partnerId ? `${formType}-${partnerId}` : formType;
+
             return `
                 <div class="space-y-3">
-                    <input type="text" id="${formType}-name${partnerSuffix}" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    <input type="date" id="${formType}-dob${partnerSuffix}" placeholder="Date of Birth" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    <input type="time" id="${formType}-tob${partnerSuffix}" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    <input type="text" id="${formType}-city${partnerSuffix}" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="text" id="${idPrefix}-name" placeholder="${t('chart_name_placeholder')}" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="date" id="${idPrefix}-dob" placeholder="${t('chart_dob_placeholder')}" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="time" id="${idPrefix}-tob" placeholder="${t('chart_tob_placeholder')}" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="text" id="${idPrefix}-city" placeholder="${t('chart_city_placeholder')}" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     
-                    ${showAdvancedFields ? `
-                        ${formType === 'chart' ? `
-                            <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                        ` : ''}
-                        <textarea id="${formType}-query" rows="3" placeholder="${formType === 'chart' ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
+                    ${formType === 'chart' ? `
+                        <input type="number" id="chart-year" placeholder="${t('chart_year_placeholder')}" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                         <p class="text-xs text-gray-500 mt-1" data-lang-key="chart_year_desc">${t('chart_year_desc')}</p>
+                    ` : ''}
+                    
+                    ${formType === 'chart' || formType === 'health' ? `
+                        <textarea id="${formType}-query" rows="3" placeholder="${t(formType === 'chart' ? 'chart_query_placeholder' : 'health_query_placeholder')}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
+                        <p class="text-xs text-gray-500 mt-1" data-lang-key="${formType === 'chart' ? 'chart_query_desc' : 'health_query_desc'}">${t(formType === 'chart' ? 'chart_query_desc' : 'health_query_desc')}</p>
                     ` : ''}
                 </div>
             `;
         }
+
         function renderChartForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-indigo-300 mb-6 border-b border-indigo-700/50 pb-2">Natal Chart & Forecast</h2>
+                <h2 class="text-3xl font-bold text-indigo-300 mb-6 border-b border-indigo-700/50 pb-2" data-lang-key="chart_title">${t('chart_title')}</h2>
                 <form id="chart-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl">
-                    <p class="text-sm text-gray-400 mb-4">Enter your birth details to receive a comprehensive analysis, annual forecast, or a specific query response.</p>
+                    <p class="text-sm text-gray-400 mb-4" data-lang-key="chart_desc">${t('chart_desc')}</p>
                     ${getFormFields('chart')}
-                    <button type="submit" class="w-full p-3 mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
+                    <button type="submit" class="w-full p-3 mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200" data-lang-key="chart_button">${t('chart_button')}</button>
                 </form>
                 <div id="reading-output" class="mt-8"></div>
             `;
@@ -596,37 +831,38 @@
         function renderHealthForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-pink-300 mb-6 border-b border-pink-700/50 pb-2">Holistic Health Profile</h2>
+                <h2 class="text-3xl font-bold text-pink-300 mb-6 border-b border-pink-700/50 pb-2" data-lang-key="health_title">${t('health_title')}</h2>
                 <form id="health-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl">
-                    <p class="text-sm text-gray-400 mb-4">Get an astrological perspective on your vitality, strengths, and areas for preventative care.</p>
+                    <p class="text-sm text-gray-400 mb-4" data-lang-key="health_desc">${t('health_desc')}</p>
                     ${getFormFields('health')}
-                    <button type="submit" class="w-full p-3 mt-5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Profile</button>
+                    <button type="submit" class="w-full p-3 mt-5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200" data-lang-key="health_button">${t('health_button')}</button>
                 </form>
                 <div id="reading-output" class="mt-8"></div>
             `;
             document.getElementById('health-form').addEventListener('submit', handleHealthSubmit);
             state.currentReading = null;
         }
+        
         function renderMatchingForm() {
-            const contentArea = document.getElementById('content-area');
+             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-amber-300 mb-6 border-b border-amber-700/50 pb-2">Kundali Matching</h2>
+                <h2 class="text-3xl font-bold text-orange-400 mb-6 border-b border-orange-700/50 pb-2" data-lang-key="matching_title">${t('matching_title')}</h2>
                 <form id="matching-form" class="space-y-6">
                     <!-- Partner 1 -->
-                    <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-indigo-500/50">
-                         <h3 class="text-xl font-bold text-indigo-300 mb-3">Partner 1 (Your Details)</h3>
-                         <p class="text-sm text-gray-400 mb-4">Your saved profile details are loaded here.</p>
-                        ${getFormFields('matching', '1')}
+                    <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-indigo-700/50">
+                        <h3 class="text-xl font-bold text-indigo-300 mb-2" data-lang-key="matching_p1_title">${t('matching_p1_title')}</h3>
+                        <p class="text-sm text-gray-400 mb-4" data-lang-key="matching_p1_desc">${t('matching_p1_desc')}</p>
+                        ${getFormFields('matching', 'p1')}
                     </div>
                     
                     <!-- Partner 2 -->
                     <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-700">
-                         <h3 class="text-xl font-bold text-gray-300 mb-3">Partner 2 Details</h3>
-                         <p class="text-sm text-gray-400 mb-4">Enter the second person's birth details.</p>
-                        ${getFormFields('matching', '2')}
+                        <h3 class="text-xl font-bold text-gray-300 mb-2" data-lang-key="matching_p2_title">${t('matching_p2_title')}</h3>
+                        <p class="text-sm text-gray-400 mb-4" data-lang-key="matching_p2_desc">${t('matching_p2_desc')}</p>
+                        ${getFormFields('matching', 'p2')}
                     </div>
                     
-                    <button type="submit" class="w-full p-3 mt-5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Compatibility Report</button>
+                    <button type="submit" class="w-full p-3 mt-5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200" data-lang-key="matching_button">${t('matching_button')}</button>
                 </form>
                 <div id="reading-output" class="mt-8"></div>
             `;
@@ -637,10 +873,10 @@
         function renderHistory() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-teal-300 mb-6 border-b border-teal-700/50 pb-2">Reading History</h2>
-                <p class="text-sm text-gray-400 mb-6">Your personal archive of cosmic insights. <span class="font-bold block text-xs mt-1">User ID: ${userId}</span></p>
+                <h2 class="text-3xl font-bold text-teal-300 mb-6 border-b border-teal-700/50 pb-2" data-lang-key="history_title">${t('history_title')}</h2>
+                <p class="text-sm text-gray-400 mb-6" data-lang-key="history_desc">${t('history_desc')} <span class="font-bold block text-xs mt-1">${t('history_user_id')} ${userId}</span></p>
                 <div id="history-list" class="space-y-4">
-                    ${state.history.length === 0 ? '<p class="text-center text-gray-500">No readings saved yet. Generate one now!</p>' : ''}
+                    ${state.history.length === 0 ? `<p class="text-center text-gray-500" data-lang-key="history_empty">${t('history_empty')}</p>` : ''}
                 </div>
             `;
             const historyList = document.getElementById('history-list');
@@ -648,29 +884,54 @@
                 const isExpanded = reading.id === historyList.dataset.expandedId;
                 const snippet = reading.content ? reading.content.substring(0, 150) + (reading.content.length > 150 ? '...' : '') : 'No content available.';
                 
-                let title = 'Reading';
-                let subtitle = reading.type ? reading.type.toUpperCase() : 'N/A';
-                
-                if (reading.type === 'matching') {
-                    title = 'Kundali Match Report';
-                    subtitle = `${reading.birthDetailsPartner1.name || 'P1'} & ${reading.birthDetailsPartner2.name || 'P2'}`;
+                let title;
+                if(reading.type === 'matching') {
+                    title = t('reading_title_matching');
+                } else if (reading.year) {
+                    title = t('reading_title_forecast', {year: reading.year});
                 } else if (reading.type === 'health') {
-                    title = 'Health Profile';
-                    subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : `For ${reading.birthDetailsPartner1.name || 'User'}`;
-                } else if (reading.type === 'chart') {
-                    if (reading.year) {
-                        title = `Annual Forecast (${reading.year})`;
-                    } else if (reading.userQuery) {
-                        title = 'Targeted Chart Query';
-                    } else {
-                        title = 'Natal Chart Overview';
-                    }
-                    subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : `For ${reading.birthDetailsPartner1.name || 'User'}`;
+                    title = t('reading_title_health');
+                } else if (reading.userQuery) {
+                    title = t('reading_title_query');
+                } else {
+                    title = t('reading_title_natal');
                 }
-
-                const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
+                
+                const subtitle = reading.userQuery ? t('reading_subtitle_query', {query: reading.userQuery}) : (reading.type ? t('reading_subtitle_type', {type: reading.type.toUpperCase()}) : 'CHART');
+                const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString(currentLanguage) : 'Date unknown';
                 const item = document.createElement('div');
                 item.className = `bg-gray-800 rounded-xl shadow-lg border border-indigo-700/50 overflow-hidden cursor-pointer transition duration-300 hover:shadow-indigo-500/30`;
+                
+                let detailsHTML = '';
+                if (reading.type === 'matching') {
+                    detailsHTML = `
+                        <p class="font-semibold text-indigo-400" data-lang-key="reading_details_p1">${t('reading_details_p1')}</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>${t('reading_details_name', {name: reading.birthDetails.name || 'N/A'})}</div>
+                            <div>${t('reading_details_dob', {dob: reading.birthDetails.dob})}</div>
+                            <div>${t('reading_details_tob', {tob: reading.birthDetails.tob})}</div>
+                            <div>${t('reading_details_city', {city: reading.birthDetails.city})}</div>
+                        </div>
+                        <p class="font-semibold text-indigo-400 mt-2" data-lang-key="reading_details_p2">${t('reading_details_p2')}</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>${t('reading_details_name', {name: reading.p2Details.name || 'N/A'})}</div>
+                            <div>${t('reading_details_dob', {dob: reading.p2Details.dob})}</div>
+                            <div>${t('reading_details_tob', {tob: reading.p2Details.tob})}</div>
+                            <div>${t('reading_details_city', {city: reading.p2Details.city})}</div>
+                        </div>
+                    `;
+                } else {
+                     detailsHTML = `
+                        <p class="font-semibold text-indigo-400" data-lang-key="reading_details">${t('reading_details')}</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>${t('reading_details_name', {name: reading.birthDetails.name || 'N/A'})}</div>
+                            <div>${t('reading_details_dob', {dob: reading.birthDetails.dob})}</div>
+                            <div>${t('reading_details_tob', {tob: reading.birthDetails.tob})}</div>
+                            <div>${t('reading_details_city', {city: reading.birthDetails.city})}</div>
+                        </div>
+                    `;
+                }
+
                 item.innerHTML = `
                     <div class="p-4 flex justify-between items-center" onclick="toggleHistoryExpansion('${reading.id}')">
                         <div>
@@ -682,41 +943,15 @@
                     </div>
                     ${isExpanded ? `
                         <div class="p-4 pt-0 text-sm text-gray-300 bg-gray-900 border-t border-indigo-700/50 space-y-4">
-                            
-                            ${reading.type === 'matching' ? `
-                                <p class="font-semibold text-indigo-400">Partner 1 Details:</p>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                    <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
-                                    <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
-                                    <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
-                                    <div>City: ${reading.birthDetailsPartner1.city}</div>
-                                </div>
-                                <p class="font-semibold text-indigo-400 mt-2">Partner 2 Details:</p>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                    <div>Name: ${reading.birthDetailsPartner2.name || 'N/A'}</div>
-                                    <div>DOB: ${reading.birthDetailsPartner2.dob}</div>
-                                    <div>TOB: ${reading.birthDetailsPartner2.tob}</div>
-                                    <div>City: ${reading.birthDetailsPartner2.city}</div>
-                                </div>
-                            ` : `
-                                <p class="font-semibold text-indigo-400">Birth Details:</p>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                    <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
-                                    <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
-                                    <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
-                                    <div>City: ${reading.birthDetailsPartner1.city}</div>
-                                </div>
-                            `}
-
-                            <p class="font-semibold text-indigo-400 mt-4">Reading:</p>
+                            ${detailsHTML}
+                            <p class="font-semibold text-indigo-400 mt-4" data-lang-key="history_reading_title">${t('history_reading_title')}</p>
                             <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.content || 'No content.'}</div>
-                            
                             ${reading.followUpContent ? `
-                                <p class="font-semibold text-indigo-400 mt-4 border-t border-indigo-700/50 pt-4">Follow-up: ${reading.followUpQuestion}</p>
+                                <p class="font-semibold text-indigo-400 mt-4 border-t border-indigo-700/50 pt-4">${t('history_followup_title', {question: reading.followUpQuestion})}</p>
                                 <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.followUpContent}</div>
                             ` : ''}
-                            <button onclick="deleteReading('${reading.id}')" class="mt-4 text-xs text-red-400 hover:text-red-500 transition duration-150">
-                                Delete History Item
+                            <button onclick="deleteReading('${reading.id}')" class="mt-4 text-xs text-red-400 hover:text-red-500 transition duration-150" data-lang-key="history_delete_button">
+                                ${t('history_delete_button')}
                             </button>
                         </div>
                     ` : `
@@ -735,22 +970,18 @@
             }
             renderHistory();
         }
-        function renderReadingOutput(readingText, readingData) {
+        function renderReadingOutput(readingText) {
             const outputDiv = document.getElementById('reading-output');
             if (!outputDiv) return;
             outputDiv.innerHTML = `
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl border border-indigo-700/50 space-y-4">
-                    <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${readingData.title}</h3>
+                    <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${state.currentReading.title}</h3>
                     <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${readingText}</div>
-                    
-                    <!-- Follow-up Section (Not available for matching) -->
-                    ${readingData.type !== 'matching' ? `
                     <div class="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
-                        <h4 class="font-semibold text-indigo-300 mb-3">Ask a Follow-up Question</h4>
-                        <textarea id="follow-up-query" rows="2" placeholder="Ask a specific question based on the reading above..." class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
-                        <button class="mt-3 w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition duration-200" onclick="handleFollowUp()">Get Follow-up Answer</button>
+                        <h4 class="font-semibold text-indigo-300 mb-3" data-lang-key="output_followup_title">${t('output_followup_title')}</h4>
+                        <textarea id="follow-up-query" rows="2" placeholder="${t('output_followup_placeholder')}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
+                        <button class="mt-3 w-full py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-semibold rounded-lg transition duration-200" onclick="handleFollowUp()" data-lang-key="output_followup_button">${t('output_followup_button')}</button>
                     </div>
-                    ` : ''}
                 </div>
             `;
         }
@@ -764,9 +995,9 @@
             const followUpBlock = document.createElement('div');
             followUpBlock.className = 'mt-4 pt-4 border-t border-indigo-700/50 space-y-4';
             followUpBlock.innerHTML = `
-                <p class="font-semibold text-indigo-400">Your Question:</p>
+                <p class="font-semibold text-indigo-400" data-lang-key="output_followup_question">${t('output_followup_question')}</p>
                 <p class="italic text-gray-300">"${query}"</p>
-                <p class="font-semibold text-indigo-400">AI Response:</p>
+                <p class="font-semibold text-indigo-400" data-lang-key="output_followup_response">${t('output_followup_response')}</p>
                 <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${answer}</div>
             `;
             readingBlock.appendChild(followUpBlock);
@@ -776,29 +1007,28 @@
         async function handleFollowUp() {
             const followUpQuery = document.getElementById('follow-up-query').value.trim();
             if (!followUpQuery) {
-                showModal('Input Required', 'Please type your follow-up question.', 'error');
+                showModal('modal_input_required', 'modal_follow_up_missing', 'error');
                 return;
             }
             const currentReading = state.currentReading;
             if (!currentReading || !currentReading.content) {
-                showModal('Error', 'Original reading context is missing.', 'error');
+                showModal('modal_error', 'modal_context_missing', 'error');
                 return;
             }
-            
-            const payload = {
-                birthDetailsPartner1: currentReading.birthDetailsPartner1,
-                userQuery: followUpQuery,
-                yearInput: currentReading.year,
-                readingType: currentReading.type, 
-                previousReading: currentReading.content // Pass the previous reading as context
-            };
-            
-            const answer = await generateReading(payload, null); // readingData is null for follow-up
-            
+            const readingData = { ...currentReading }; 
+            const answer = await generateReading(
+                currentReading.birthDetails,
+                followUpQuery,
+                currentReading.year,
+                currentReading.type, 
+                currentReading.content,
+                readingData,
+                currentReading.p2Details
+            );
             if (answer) {
                 renderFollowUpOutput(followUpQuery, answer);
                 const combinedReading = {
-                    ...currentReading,
+                    ...readingData,
                     content: currentReading.content, 
                     followUpQuestion: followUpQuery,
                     followUpContent: answer,
@@ -809,107 +1039,96 @@
                 state.currentReading.followUpContent = answer;
             }
         }
-
-        function getReadingData(formType) {
-            let birthDetailsPartner1 = {};
-            let birthDetailsPartner2 = {};
-            let query = '', year = '', title = '';
-
-            if (formType === 'chart' || formType === 'health') {
-                birthDetailsPartner1.name = document.getElementById(`${formType}-name`).value.trim();
-                birthDetailsPartner1.dob = document.getElementById(`${formType}-dob`).value;
-                birthDetailsPartner1.tob = document.getElementById(`${formType}-tob`).value;
-                birthDetailsPartner1.city = document.getElementById(`${formType}-city`).value.trim();
-                query = document.getElementById(`${formType}-query`).value.trim();
-                if (formType === 'chart') {
-                    year = document.getElementById('chart-year').value.trim();
-                }
-
-                if (!birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city) {
-                    showModal('Input Required', 'Date of Birth, Time of Birth, and City are required.', 'error');
-                    return null;
-                }
-                
-                if (formType === 'health') {
-                    title = 'Holistic Health Profile';
-                } else if (year) {
-                    title = `Annual Forecast for ${year}`;
-                } else if (query) {
-                    title = `Targeted Chart Query`;
-                } else {
-                    title = 'Comprehensive Natal Chart Overview';
-                }
-            } else if (formType === 'matching') {
-                birthDetailsPartner1.name = document.getElementById(`matching-name1`).value.trim();
-                birthDetailsPartner1.dob = document.getElementById(`matching-dob1`).value;
-                birthDetailsPartner1.tob = document.getElementById(`matching-tob1`).value;
-                birthDetailsPartner1.city = document.getElementById(`matching-city1`).value.trim();
-                
-                birthDetailsPartner2.name = document.getElementById(`matching-name2`).value.trim();
-                birthDetailsPartner2.dob = document.getElementById(`matching-dob2`).value;
-                birthDetailsPartner2.tob = document.getElementById(`matching-tob2`).value;
-                birthDetailsPartner2.city = document.getElementById(`matching-city2`).value.trim();
-
-                if (!birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city || !birthDetailsPartner2.dob || !birthDetailsPartner2.tob || !birthDetailsPartner2.city) {
-                    showModal('Input Required', 'All birth details for both partners are required.', 'error');
-                    return null;
-                }
-                title = `Kundali Match: ${birthDetailsPartner1.name || 'P1'} & ${birthDetailsPartner2.name || 'P2'}`;
-            }
+        function getReadingData(formType, partnerId = null) {
+            const idPrefix = partnerId ? `${formType}-${partnerId}` : formType;
             
-            return { birthDetailsPartner1, birthDetailsPartner2, query, year, type: formType, title };
+            const name = document.getElementById(`${idPrefix}-name`).value.trim();
+            const dob = document.getElementById(`${idPrefix}-dob`).value;
+            const tob = document.getElementById(`${idPrefix}-tob`).value;
+            const city = document.getElementById(`${idPrefix}-city`).value.trim();
+
+            if (!dob || !tob || !city) {
+                return null; // Will be caught by the submit handler
+            }
+
+            const birthDetails = { name, dob, tob, city };
+            
+            if (formType === 'matching') {
+                return birthDetails; // Just return details for matching
+            }
+
+            // For chart/health
+            const query = document.getElementById(`${formType}-query`).value.trim();
+            const year = formType === 'chart' ? document.getElementById('chart-year').value.trim() : null;
+
+            let title = '';
+            if (formType === 'health') {
+                title = t('reading_title_health');
+            } else if (year) {
+                title = t('reading_title_forecast', {year: year});
+            } else if (query) {
+                title = t('reading_title_query');
+            } else {
+                title = t('reading_title_natal');
+            }
+            return { birthDetails, query, year, type: formType, title };
         }
 
         async function handleChartSubmit(e) {
             e.preventDefault();
             const readingData = getReadingData('chart');
-            if (!readingData) return;
-            
-            const payload = {
-                birthDetailsPartner1: readingData.birthDetailsPartner1,
-                userQuery: readingData.query,
-                yearInput: readingData.year,
-                readingType: 'chart'
-            };
-
-            const generatedText = await generateReading(payload, readingData);
+            if (!readingData) {
+                showModal('modal_validation_error', 'modal_validation_details', 'error');
+                return;
+            }
+            const { birthDetails, query, year, type, title } = readingData;
+            const generatedText = await generateReading(birthDetails, query, year, type, null, readingData);
             if (generatedText) {
-                renderReadingOutput(generatedText, state.currentReading);
-                await saveReading({ ...state.currentReading, userQuery: readingData.query || null });
+                renderReadingOutput(generatedText);
+                await saveReading({ ...state.currentReading, userQuery: query || null });
             }
         }
         async function handleHealthSubmit(e) {
             e.preventDefault();
             const readingData = getReadingData('health');
-            if (!readingData) return;
-            
-            const payload = {
-                birthDetailsPartner1: readingData.birthDetailsPartner1,
-                userQuery: readingData.query,
-                readingType: 'health'
-            };
-
-            const generatedText = await generateReading(payload, readingData);
+            if (!readingData) {
+                showModal('modal_validation_error', 'modal_validation_details', 'error');
+                return;
+            }
+            const { birthDetails, query, type, title } = readingData;
+            const generatedText = await generateReading(birthDetails, query, null, type, null, readingData);
             if (generatedText) {
-                renderReadingOutput(generatedText, state.currentReading);
-                await saveReading({ ...state.currentReading, userQuery: readingData.query || null });
+                renderReadingOutput(generatedText);
+                await saveReading({ ...state.currentReading, userQuery: query || null });
             }
         }
+        
         async function handleMatchingSubmit(e) {
             e.preventDefault();
-            const readingData = getReadingData('matching');
-            if (!readingData) return;
-            
-            const payload = {
-                birthDetailsPartner1: readingData.birthDetailsPartner1,
-                birthDetailsPartner2: readingData.birthDetailsPartner2,
-                readingType: 'matching'
+            const p1Details = getReadingData('matching', 'p1');
+            const p2Details = getReadingData('matching', 'p2');
+
+            if (!p1Details) {
+                showModal('modal_validation_error', 'modal_validation_partner1', 'error');
+                return;
+            }
+            if (!p2Details) {
+                showModal('modal_validation_error', 'modal_validation_partner2', 'error');
+                return;
+            }
+
+            const readingData = {
+                birthDetails: p1Details,
+                p2Details: p2Details,
+                type: 'matching',
+                title: t('reading_title_matching')
             };
+
+            const generatedText = await generateReading(p1Details, null, null, 'matching', null, readingData, p2Details);
             
-            const generatedText = await generateReading(payload, readingData);
             if (generatedText) {
-                renderReadingOutput(generatedText, state.currentReading);
-                await saveReading({ ...state.currentReading });
+                renderReadingOutput(generatedText);
+                await saveReading({ ...state.currentReading, content: generatedText });
             }
         }
         
@@ -953,8 +1172,8 @@
                         // This is the error you were seeing: auth/configuration-not-found
                         // This MUST be fixed by ENABLING Anonymous Sign-In in your Firebase project.
                         document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
-                            <h3 class="font-bold text-red-300 text-lg">Error: Could not authenticate with server.</h3>
-                            <p class="text-red-200 mt-2">Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.</p>
+                            <h3 class="font-bold text-red-300 text-lg">${t('auth_error_anon_fail')}</h3>
+                            <p class="text-red-200 mt-2">${t('auth_error_anon_fail_desc')}</p>
                         </div>`;
                         return; // Stop app initialization
                     }
@@ -982,13 +1201,20 @@
                     // This error will be handled by the onAuthStateChanged listener's catch block
                 });
             }
+            
+            // Add language selector listener
+            document.getElementById('language-selector').addEventListener('change', (e) => {
+                translateUI(e.target.value);
+            });
+            // Set initial language
+            translateUI(currentLanguage);
 
         } else {
             console.error("Firebase config is missing. Please paste your Firebase project config into index.html.");
             // If Firebase is missing, show a clear error.
             document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
-                <h3 class="font-bold text-red-300 text-lg">Error: Firebase configuration is missing.</h3>
-                <p class="text-red-200 mt-2">The app cannot start. Please paste your Firebase project config into the \`index.html\` file.</p>
+                <h3 class="font-bold text-red-300 text-lg">${t('auth_error_config_missing')}</h3>
+                <p class="text-red-200 mt-2">${t('auth_error_config_missing_desc')}</p>
             </div>`;
         }
 
