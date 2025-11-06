@@ -125,6 +125,7 @@
         window.userId = null;
         window.isAuthReady = false;
         window.activeSnapshotUnsubscribe = null;
+        window.firebaseExports = null; // Will be populated *after* init
 
         // Mandated Global Variables Check
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -145,77 +146,81 @@
 
         // Check if the config is filled out
         if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
-            setLogLevel('debug'); // Enable Firestore logging for debugging
-            const app = initializeApp(firebaseConfig);
-            window.db = getFirestore(app);
-            window.auth = getAuth(app);
-            
-            // 1. Initial Authentication and Listener Setup
-            onAuthStateChanged(window.auth, async (user) => {
-                if (user) {
-                    window.userId = user.uid;
-                } else {
-                    // Sign in anonymously if no user is found, as a fallback
-                    try {
-                        await signInAnonymously(window.auth);
-                        window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
-                    } catch (e) {
-                        console.error("Anonymous sign-in failed:", e);
-                        // This is where auth/configuration-not-found would appear
-                        // If this fails, app will be stuck on splash screen
-                         document.getElementById('content-area').innerHTML = `<p class="text-center mt-8 text-red-400">Error: Could not authenticate with server. Please ensure Anonymous Sign-In is enabled in your Firebase project.</p>`;
-                         return;
-                    }
-                }
-                
-                // *** THIS IS THE FIX for the "Cannot read properties" error ***
-                // Ensure firebaseExports is initialized *before* calling functions that use it.
-                if (!window.firebaseExports) {
-                    window.firebaseExports = {
-                        createUserWithEmailAndPassword,
-                        signInWithEmailAndPassword,
-                        signOut,
-                        doc,
-                        setDoc,
-                        collection,
-                        query,
-                        where,
-                        addDoc,
-                        onSnapshot,
-                        getDocs,
-                        orderBy,
-                        appId,
-                        db,
-                        auth
-                    };
-                }
-
-                window.isAuthReady = true;
-                
-                // Once authenticated, load user profile and set up history listener
-                await loadUserProfile();
-                setupHistoryListener();
-                
-                console.log("Firebase initialized. User ID:", window.userId);
+            try {
+                setLogLevel('debug'); // Enable Firestore logging for debugging
+                const app = initializeApp(firebaseConfig);
+                window.db = getFirestore(app);
+                window.auth = getAuth(app);
 
                 // *** THIS IS THE FIX ***
-                // ONLY render the initial view AFTER auth is confirmed.
-                switchView('home'); 
-            });
+                // Initialize firebaseExports *immediately* after app init
+                window.firebaseExports = {
+                    createUserWithEmailAndPassword,
+                    signInWithEmailAndPassword,
+                    signOut,
+                    doc,
+                    setDoc,
+                    collection,
+                    query,
+                    where,
+                    addDoc,
+                    onSnapshot,
+                    getDocs,
+                    orderBy,
+                    appId,
+                    db,
+                    auth
+                };
+                
+                // 1. Initial Authentication and Listener Setup
+                onAuthStateChanged(window.auth, async (user) => {
+                    if (user) {
+                        window.userId = user.uid;
+                    } else {
+                        // Sign in anonymously if no user is found, as a fallback
+                        try {
+                            await signInAnonymously(window.auth);
+                            window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
+                        } catch (e) {
+                            console.error("Anonymous sign-in failed:", e);
+                            // This is where auth/configuration-not-found would appear
+                            // If this fails, app will be stuck on splash screen
+                            document.getElementById('content-area').innerHTML = `<p class="text-center mt-8 text-red-400">Error: Could not authenticate with server. Please ensure Anonymous Sign-In is enabled in your Firebase project.</p>`;
+                            return;
+                        }
+                    }
+                    
+                    window.isAuthReady = true;
+                    
+                    // Once authenticated, load user profile and set up history listener
+                    await loadUserProfile();
+                    setupHistoryListener();
+                    
+                    console.log("Firebase initialized. User ID:", window.userId);
 
-            // Attempt custom token sign-in if token is available
-            if (initialAuthToken) {
-                try {
-                    await signInWithCustomToken(window.auth, initialAuthToken);
-                } catch (e)
-                {
-                    console.error("Custom token sign-in failed:", e);
-                    // If token fails, auth listener will still trigger anonymous sign-in
+                    // *** THIS IS THE FIX ***
+                    // ONLY render the initial view AFTER auth is confirmed.
+                    switchView('home'); 
+                });
+
+                // Attempt custom token sign-in if token is available
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(window.auth, initialAuthToken);
+                    } catch (e)
+                    {
+                        console.error("Custom token sign-in failed:", e);
+                        // If token fails, auth listener will still trigger anonymous sign-in
+                    }
+                } else if (!window.auth.currentUser) {
+                    // If no token and no user, trigger anonymous sign-in immediately
+                    // The onAuthStateChanged listener will catch this.
+                    signInAnonymously(window.auth).catch(e => console.error("Initial anonymous sign-in failed:", e));
                 }
-            } else if (!window.auth.currentUser) {
-                // If no token and no user, trigger anonymous sign-in immediately
-                // The onAuthStateChanged listener will catch this.
-                signInAnonymously(window.auth).catch(e => console.error("Initial anonymous sign-in failed:", e));
+
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                document.getElementById('content-area').innerHTML = `<p class="text-center mt-8 text-red-400">Error: Firebase app initialization failed. ${e.message}</p>`;
             }
 
         } else {
@@ -496,7 +501,7 @@
                     <input type="text" id="profile-name" placeholder="Name" value="${p.name}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <input type="date" id="profile-dob" placeholder="Date of Birth" value="${p.dob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <input type="time" id="profile-tob" placeholder="Time of Birth" value="${p.tob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input typeS="text" id="profile-city" placeholder="City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="text" id="profile-city" placeholder="City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleSaveProfile()">Save Default Details</button>
                 </form>
             `;
