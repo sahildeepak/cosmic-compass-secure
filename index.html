@@ -129,28 +129,22 @@
         // Mandated Global Variables Check
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         
-        //
-        // === THIS IS THE CRITICAL FIX ===
-        //
-        // REMOVE the dynamic __firebase_config check
-        // const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        // const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // ADD your own Firebase config object here
+        // YOUR FIREBASE CONFIG OBJECT
         const firebaseConfig = {
-            apiKey: "AIzaSyD_hTndy6xst4f8hxAbJ42R9sX_82BMFdc",
-            authDomain: "cosmic-compass-dbc12.firebaseapp.com",
-            projectId: "cosmic-compass-dbc12",
-            storageBucket: "cosmic-compass-dbc12.firebasestorage.app",
-            messagingSenderId: "1077342508451",
-            appId: "1:1077342508451:web:b3896f9add3003ba80f616",
-            measurementId: "G-9QDKQVFJ1Y"
+          apiKey: "AIzaSyD_hTndy6xst4f8hxAbJ42R9sX_82BMFdc",
+          authDomain: "cosmic-compass-dbc12.firebaseapp.com",
+          projectId: "cosmic-compass-dbc12",
+          storageBucket: "cosmic-compass-dbc12.firebasestorage.app",
+          messagingSenderId: "1077342508451",
+          appId: "1:1077342508451:web:b3896f9add3003ba80f616",
+          measurementId: "G-9QDKQVFJ1Y"
         };
         
         // We set initialAuthToken to null because it doesn't exist on Netlify
         const initialAuthToken = null; 
 
-        if (firebaseConfig && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
+        // Check if the config is filled out
+        if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
             setLogLevel('debug'); // Enable Firestore logging for debugging
             const app = initializeApp(firebaseConfig);
             window.db = getFirestore(app);
@@ -162,10 +156,40 @@
                     window.userId = user.uid;
                 } else {
                     // Sign in anonymously if no user is found, as a fallback
-                    await signInAnonymously(window.auth).catch(e => console.error("Anonymous sign-in failed:", e));
-                    window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
+                    try {
+                        await signInAnonymously(window.auth);
+                        window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
+                    } catch (e) {
+                        console.error("Anonymous sign-in failed:", e);
+                        // This is where auth/configuration-not-found would appear
+                        // If this fails, app will be stuck on splash screen
+                         document.getElementById('content-area').innerHTML = `<p class="text-center mt-8 text-red-400">Error: Could not authenticate with server. Please ensure Anonymous Sign-In is enabled in your Firebase project.</p>`;
+                         return;
+                    }
                 }
                 
+                // *** THIS IS THE FIX for the "Cannot read properties" error ***
+                // Ensure firebaseExports is initialized *before* calling functions that use it.
+                if (!window.firebaseExports) {
+                    window.firebaseExports = {
+                        createUserWithEmailAndPassword,
+                        signInWithEmailAndPassword,
+                        signOut,
+                        doc,
+                        setDoc,
+                        collection,
+                        query,
+                        where,
+                        addDoc,
+                        onSnapshot,
+                        getDocs,
+                        orderBy,
+                        appId,
+                        db,
+                        auth
+                    };
+                }
+
                 window.isAuthReady = true;
                 
                 // Once authenticated, load user profile and set up history listener
@@ -197,28 +221,9 @@
         } else {
             console.error("Firebase config is missing. Please paste your Firebase project config into index.html.");
             // If Firebase is missing, show an error.
-            // REMOVE THE CONFIG OBJECT FROM HERE
             document.getElementById('content-area').innerHTML = '<p class="text-center mt-8 text-red-400">Error: Firebase configuration is missing. The app cannot start.</p>';
         }
 
-        // Expose Firebase functions to global scope for use in non-module scripts
-        window.firebaseExports = {
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut,
-            doc,
-            setDoc,
-            collection,
-            query,
-            where,
-            addDoc,
-            onSnapshot,
-            getDocs,
-            orderBy,
-            appId,
-            db,
-            auth
-        };
     </script>
     
     <!-- Application Logic -->
@@ -238,13 +243,11 @@
         };
 
         // --- UTILITY FUNCTIONS ---
-
         function showLoading(show) {
             document.getElementById('loading-overlay').classList.toggle('hidden', !show);
         }
 
         function showModal(title, content, type = 'info') {
-            // Avoid opening modal if one is already open
             if (state.modalOpen) return; 
             
             const modalContainer = document.getElementById('modal-container');
@@ -269,21 +272,21 @@
         }
 
         // --- FIREBASE / DATA MANAGEMENT ---
-
         async function loadUserProfile() {
             if (!window.userId || !window.db) return;
-
+            // *** THIS IS THE FIX for "Cannot read properties of undefined (reading 'query')" ***
+            // Ensure firebaseExports is ready before trying to use it.
+            if (!window.firebaseExports) {
+                console.error("loadUserProfile: firebaseExports not ready.");
+                return; 
+            }
             const { db, appId, userId, doc, firebaseExports } = window.firebaseExports;
-            
             try {
-                // We query the 'user_profile' collection for the 'details' document
                 const profileQuery = firebaseExports.query(
                     firebaseExports.collection(db, 'artifacts', appId, 'users', userId, 'user_profile')
                 );
                 const snapshot = await firebaseExports.getDocs(profileQuery);
-
                 if (!snapshot.empty) {
-                    // Assuming 'details' is the only doc, or we take the first one
                     const data = snapshot.docs[0].data(); 
                     state.userProfile = {
                         name: data.name || '',
@@ -299,52 +302,47 @@
                 console.error("Error loading profile:", e);
             }
         }
-
         async function saveUserProfile(details) {
-            if (!window.userId || !window.db) {
+            if (!window.userId || !window.db || !window.firebaseExports) {
                 showModal('Error', 'Please wait for authentication to complete.', 'error');
                 return;
             }
-
             const { db, appId, userId, doc, setDoc } = window.firebaseExports;
-            // We use a specific document ID ('details') for consistency.
             const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'user_profile', 'details'); 
-
             try {
                 await setDoc(profileRef, details, { merge: true });
                 state.userProfile = details;
                 showModal('Success', 'Your default birth details have been saved! Your readings will auto-fill with this data.', 'info');
-                renderCurrentView(); // Re-render to update forms
+                renderCurrentView(); 
             } catch (e) {
                 console.error("Error saving profile:", e);
                 showModal('Error', 'Failed to save profile. Please check console for details.', 'error');
             }
         }
-        
         function setupHistoryListener() {
             if (window.activeSnapshotUnsubscribe) {
                 console.log("Detaching old history listener.");
-                window.activeSnapshotUnsubscribe(); // Detach old listener if user changes
+                window.activeSnapshotUnsubscribe(); 
                 window.activeSnapshotUnsubscribe = null;
             }
-
             if (!window.userId || !window.db) return;
 
-
+            // *** THIS IS THE FIX for "Cannot read properties of undefined (reading 'indexOf')" ***
+            // Ensure firebaseExports is ready before trying to use it.
+            if (!window.firebaseExports) {
+                console.error("setupHistoryListener: firebaseExports not ready.");
+                return;
+            }
             const { db, appId, userId, collection, query, onSnapshot } = window.firebaseExports;
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
-            const q = query(historyRef); // Removed orderBy for stability
-
+            const q = query(historyRef); 
             window.activeSnapshotUnsubscribe = onSnapshot(q, (snapshot) => {
                 const readings = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     readings.push({ id: doc.id, ...data });
                 });
-                
-                // Sort client-side by timestamp DESC (newest first)
                 readings.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
                 state.history = readings;
                 if (state.currentView === 'history') {
                     renderHistory();
@@ -354,31 +352,23 @@
             });
             console.log("History listener active for user:", window.userId);
         }
-
         async function saveReading(readingData) {
-            if (!window.userId || !window.db) return;
-
+            if (!window.userId || !window.db || !window.firebaseExports) return;
             const { db, appId, userId, collection, addDoc } = window.firebaseExports;
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
-
             try {
                 await addDoc(historyRef, {
                     ...readingData,
                     timestamp: Date.now(),
-                    userId: userId // Ensure reading is tagged with user ID
+                    userId: userId 
                 });
                 console.log("Reading saved to history.");
             } catch (e) {
                 console.error("Error saving reading:", e);
             }
         }
-
         async function deleteReading(id) {
-            // This is intentionally disabled for stability in the environment.
             showModal('Action Disabled', 'Deleting history items is disabled to maintain code stability in the current environment.', 'info');
-            // In a real app, you would enable deleteDoc in the firebaseExports and use:
-            // const { db, appId, userId, doc, deleteDoc } = window.firebaseExports;
-            // await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'astrology_readings', id));
         }
         
         // --- GEMINI API COMMUNICATION (SECURE PROXY) ---
@@ -386,9 +376,7 @@
         async function generateReading(birthDetails, userQuery, yearInput, readingType, previousReading = null, readingData) {
             showLoading(true);
             
-            // This fetch call goes to the secure proxy endpoint on Netlify.
             const apiUrl = '/.netlify/functions/generateReading'; 
-
             const payload = {
                 birthDetails,
                 userQuery,
@@ -416,11 +404,18 @@
                         delay *= 2;
                         continue;
                     }
-                    // Handle specific errors from the proxy
-                    if (!response.ok) {
+                    
+                    // *** THIS IS THE ROBUST ERROR HANDLING FIX ***
+                    // Try to parse the error as JSON, but if it fails, use the raw text.
+                    let errorText = `Proxy request failed with status: ${response.status}`;
+                    try {
                         const errorResult = await response.json();
-                        throw new Error(errorResult.error || `Proxy request failed with status: ${response.status}`);
+                        errorText = errorResult.error || JSON.stringify(errorResult);
+                    } catch (e) {
+                        // Failed to parse JSON, get raw text instead
+                        errorText = await response.text(); 
                     }
+                    throw new Error(errorText);
                 }
 
                 if (!response.ok) {
@@ -447,6 +442,7 @@
                 return result.text;
             } catch (error) {
                 console.error("AI Generation Error:", error);
+                // The error message will now be more informative (e.g., the actual text from the server)
                 showModal('AI Generation Failed', `There was an error generating the reading: ${error.message}. Please check your Netlify logs and Gemini API Key.`, 'error');
                 return null;
             } finally {
@@ -454,14 +450,12 @@
             }
         }
 
-        // --- AUTH/PROFILE MODAL LOGIC (No longer forcing login, this is just for profile management) ---
-
+        // --- AUTH/PROFILE MODAL LOGIC ---
         function showProfileModal(requireAuth = false) {
-            if (!window.isAuthReady) {
+            if (!window.isAuthReady || !window.firebaseExports) {
                 showModal('Loading', 'Please wait while we connect to the server...', 'info');
                 return;
             }
-            
             const isAuthenticated = window.auth.currentUser && !window.auth.currentUser.isAnonymous;
             const profileContent = `
                 ${isAuthenticated ? `
@@ -482,10 +476,8 @@
                     ${renderAuthForm(false)}
                 `}
             `;
-
             showModal('User Profile & Auth', profileContent, 'info');
         }
-
         function renderAuthForm(isSignIn) {
             return `
                 <form id="${isSignIn ? 'sign-in' : 'sign-up'}-form" class="space-y-3 p-4 border border-indigo-700/50 rounded-xl bg-gray-900/50 mb-4">
@@ -496,7 +488,6 @@
                 </form>
             `;
         }
-
         function renderProfileForm() {
             const p = state.userProfile;
             return `
@@ -505,24 +496,20 @@
                     <input type="text" id="profile-name" placeholder="Name" value="${p.name}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <input type="date" id="profile-dob" placeholder="Date of Birth" value="${p.dob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <input type="time" id="profile-tob" placeholder="Time of Birth" value="${p.tob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="text" id="profile-city" placeholder="City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input typeS="text" id="profile-city" placeholder="City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleSaveProfile()">Save Default Details</button>
                 </form>
             `;
         }
-        
         async function handleAuth(isSignIn) {
             const formId = isSignIn ? 'sign-in' : 'sign-up';
             const email = document.getElementById(`${formId}-email`).value;
             const password = document.getElementById(`${formId}-password`).value;
-
             const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.firebaseExports;
-
             if (!email || password.length < 6) {
                 showModal('Error', 'Please enter a valid email and a password of at least 6 characters.', 'error');
                 return;
             }
-
             try {
                 showLoading(true);
                 if (isSignIn) {
@@ -532,7 +519,7 @@
                     await createUserWithEmailAndPassword(window.auth, email, password);
                     showModal('Account Created!', `Successfully created and signed in as ${email}.`, 'info');
                 }
-                closeModal(); // Close the auth modal on success
+                closeModal(); 
             } catch (error) {
                 let errorMessage = 'Authentication Failed.';
                 if (error.code) {
@@ -543,62 +530,51 @@
                 showLoading(false);
             }
         }
-
         async function handleSignOut() {
             const { signOut } = window.firebaseExports;
             await signOut(window.auth);
-            state.userProfile = { name: '', dob: '', tob: '', city: '' }; // Clear local profile
+            state.userProfile = { name: '', dob: '', tob: '', city: '' }; 
             showModal('Signed Out', 'You have been signed out. You are now an anonymous user.', 'info');
-            // Auth listener will handle signing in anonymously next
         }
-
         function handleSaveProfile() {
             const name = document.getElementById('profile-name').value;
             const dob = document.getElementById('profile-dob').value;
             const tob = document.getElementById('profile-tob').value;
             const city = document.getElementById('profile-city').value;
-
             if (!dob || !tob || !city) {
                 showModal('Validation Error', 'Date of Birth, Time of Birth, and City are required to save your profile.', 'error');
                 return;
             }
-
             const details = { name, dob, tob, city };
             saveUserProfile(details);
         }
 
         // --- RENDERING FUNCTIONS (VIEWS) ---
-
         function switchView(view) {
             state.currentView = view;
             
             // Update nav bar active state
             document.querySelectorAll('.nav-item').forEach(item => {
                 const itemView = item.dataset.view;
+                const baseClasses = 'flex flex-col items-center p-2 text-sm transition-colors duration-200';
                 if (itemView === view) {
-                    item.classList.add('font-bold');
-                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-teal-300');
-                    if(view === 'home') item.classList.add('text-indigo-400');
-                    if(view === 'chart') item.classList.add('text-indigo-400');
-                    if(view === 'health') item.classList.add('text-pink-400');
-                    if(view === 'history') item.classList.add('text-teal-400');
+                    let colorClass = 'text-indigo-400'; // Default for home/chart
+                    if (view === 'health') colorClass = 'text-pink-400';
+                    if (view === 'history') colorClass = 'text-teal-400';
+                    item.className = `${baseClasses} font-bold ${colorClass}`;
                 } else {
-                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-teal-400', 'font-bold');
-                    item.classList.add('text-gray-400');
-                    if(itemView === 'home') item.classList.add('hover:text-indigo-300');
-                    if(itemView === 'chart') item.classList.add('hover:text-indigo-300');
-                    if(itemView === 'health') item.classList.add('hover:text-pink-300');
-                    if(itemView === 'history') item.classList.add('hover:text-teal-300');
+                    let hoverClass = 'hover:text-indigo-300'; // Default for home/chart
+                    if (itemView === 'health') hoverClass = 'hover:text-pink-300';
+                    if (itemView === 'history') hoverClass = 'hover:text-teal-300';
+                    item.className = `${baseClasses} text-gray-400 ${hoverClass}`;
                 }
             });
             renderCurrentView();
         }
-
         function renderCurrentView() {
-            // This function is now ONLY called *after* Firebase is ready.
             if (!window.isAuthReady || !window.db) {
-                 // The initial splash screen will just stay visible if this fails
                  console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
+                 // The initial splash screen will just stay visible if this fails
                  return;
             }
 
@@ -617,46 +593,32 @@
                     break;
             }
         }
-
         function renderHomePage() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <div class="text-center p-6 space-y-8">
                     <h2 class="text-4xl font-extrabold text-indigo-300">Welcome to Cosmic Compass</h2>
-                    
-                    <!-- SVG Hero Image -->
                     <div class="cosmic-hero mx-auto w-56 h-56 relative">
                         <svg viewBox="0 0 100 100" class="w-full h-full">
-                            <!-- Background nebula effect -->
                             <circle cx="50" cy="50" r="45" fill="none" stroke="#3730A3" stroke-width="1"/>
                             <circle cx="50" cy="50" r="35" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="1 3"/>
-
-                            <!-- Central Sun/Energy Source -->
                             <circle cx="50" cy="50" r="8" fill="#FBBF24"/>
-                            
-                            <!-- Orbital Path 1 (Earth/Moon) -->
                             <circle cx="50" cy="50" r="25" fill="none" stroke="#6366F1" stroke-width="1" stroke-dasharray="3 5" class="animate-spin-slow"/>
                             <circle cx="25" cy="50" r="3" fill="#60A5FA" transform="rotate(45, 50, 50)">
                                 <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="15s" repeatCount="indefinite"/>
                             </circle>
-                            
-                            <!-- Orbital Path 2 (Outer Planet) -->
                             <circle cx="50" cy="50" r="40" fill="none" stroke="#818CF8" stroke-width="1.5" class="animate-spin-slow"/>
                             <circle cx="90" cy="50" r="4" fill="#A78BFA" transform="rotate(-30, 50, 50)">
                                 <animateTransform attributeName="transform" type="rotate" from="360 50 50" to="0 50 50" dur="20s" repeatCount="indefinite"/>
                             </circle>
-                            
-                            <!-- Stylized Compass Needle -->
                             <polygon points="50,10 53,50 50,90 47,50" fill="#E0E7FF" transform="rotate(-15, 50, 50)">
                                 <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="30s" repeatCount="indefinite"/>
                             </polygon>
                         </svg>
                     </div>
-
                     <div class="space-y-4">
                         <p class="text-lg text-gray-300 font-medium">Cosmic Compass provides personalized astrological insights powered by advanced analysis.</p>
                         <p class="text-xl font-bold text-green-400">⭐ This is a completely FREE service! ⭐</p>
-                        
                         <div class="p-4 bg-gray-800 rounded-xl text-left space-y-3 border border-indigo-700/50">
                             <h3 class="text-xl font-semibold text-indigo-400">What you can explore:</h3>
                             <ul class="text-gray-300 space-y-2">
@@ -669,24 +631,25 @@
                 </div>
             `;
         }
-        
         function getFormFields(formType) {
             const p = state.userProfile;
+            let accentColor = 'indigo';
+            if(formType === 'health') accentColor = 'pink';
+
             return `
                 <div class="space-y-3">
-                    <input type="text" id="${formType}-name" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    <input type="date" id="${formType}-dob" placeholder="Date of Birth" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    <input type="time" id="${formType}-tob" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    <input type="text" id="${formType}-city" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    <input type="text" id="${formType}-name" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
+                    <input type="date" id="${formType}-dob" placeholder="Date of Birth" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
+                    <input type="time" id="${formType}-tob" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
+                    <input type="text" id="${formType}-city" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
                     ${formType === 'chart' ? `
-                        <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                        <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500">
                     ` : ''}
-                    <textarea id="${formType}-query" rows="3" placeholder="${formType === 'chart' ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
+                    <textarea id="${formType}-query" rows="3" placeholder="${formType === 'chart' ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:ring-${accentColor}-500 focus:border-${accentColor}-500"></textarea>
                 </div>
-                <button type="submit" class="w-full p-3 mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
+                <button type="submit" class="w-full p-3 mt-5 bg-${accentColor}-600 hover:bg-${accentColor}-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
             `;
         }
-
         function renderChartForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
@@ -698,9 +661,8 @@
                 <div id="reading-output" class="mt-8"></div>
             `;
             document.getElementById('chart-form').addEventListener('submit', handleChartSubmit);
-            state.currentReading = null; // Clear old reading when rendering new form
+            state.currentReading = null; 
         }
-
         function renderHealthForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
@@ -714,7 +676,6 @@
             document.getElementById('health-form').addEventListener('submit', handleHealthSubmit);
             state.currentReading = null;
         }
-
         function renderHistory() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
@@ -724,23 +685,30 @@
                     ${state.history.length === 0 ? '<p class="text-center text-gray-500">No readings saved yet. Generate one now!</p>' : ''}
                 </div>
             `;
-            
             const historyList = document.getElementById('history-list');
-
             state.history.forEach(reading => {
                 const isExpanded = reading.id === historyList.dataset.expandedId;
-                // Check if content exists before substring
                 const snippet = reading.content ? reading.content.substring(0, 150) + (reading.content.length > 150 ? '...' : '') : 'No content available.';
-                const title = reading.year ? `Annual Forecast (${reading.year})` : (reading.type === 'health' ? 'Health Profile' : (reading.title || 'Natal Chart Overview'));
+                
+                let title = 'Natal Chart Overview';
+                let titleColor = 'text-indigo-300';
+                if (reading.year) {
+                    title = `Annual Forecast (${reading.year})`;
+                } else if (reading.type === 'health') {
+                    title = 'Health Profile';
+                    titleColor = 'text-pink-300';
+                } else if (reading.title) {
+                    title = reading.title;
+                }
+
                 const subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : (reading.type ? reading.type.toUpperCase() : 'CHART');
                 const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
-
                 const item = document.createElement('div');
                 item.className = `bg-gray-800 rounded-xl shadow-lg border border-indigo-700/50 overflow-hidden cursor-pointer transition duration-300 hover:shadow-indigo-500/30`;
                 item.innerHTML = `
                     <div class="p-4 flex justify-between items-center" onclick="toggleHistoryExpansion('${reading.id}')">
                         <div>
-                            <p class="font-bold text-indigo-300">${title}</p>
+                            <p class="font-bold ${titleColor}">${title}</p>
                             <p class="text-xs text-gray-400">${subtitle}</p>
                             <p class="text-xs text-gray-500 mt-1">${dateTime}</p>
                         </div>
@@ -750,20 +718,17 @@
                         <div class="p-4 pt-0 text-sm text-gray-300 bg-gray-900 border-t border-indigo-700/50 space-y-4">
                             <p class="font-semibold text-indigo-400">Birth Details:</p>
                             <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                <div>Name: ${reading.birthDetails.name}</div>
+                                <div>Name: ${reading.birthDetails.name || 'N/A'}</div>
                                 <div>DOB: ${reading.birthDetails.dob}</div>
                                 <div>TOB: ${reading.birthDetails.tob}</div>
                                 <div>City: ${reading.birthDetails.city}</div>
                             </div>
                             <p class="font-semibold text-indigo-400 mt-4">Reading:</p>
                             <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.content || 'No content.'}</div>
-                            
                             ${reading.followUpContent ? `
                                 <p class="font-semibold text-indigo-400 mt-4 border-t border-indigo-700/50 pt-4">Follow-up: ${reading.followUpQuestion}</p>
                                 <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.followUpContent}</div>
                             ` : ''}
-                            
-                            <!-- Delete button disabled for stability -->
                             <button onclick="deleteReading('${reading.id}')" class="mt-4 text-xs text-red-400 hover:text-red-500 transition duration-150">
                                 Delete History Item
                             </button>
@@ -775,7 +740,6 @@
                 historyList.appendChild(item);
             });
         }
-
         function toggleHistoryExpansion(id) {
             const historyList = document.getElementById('history-list');
             if (historyList.dataset.expandedId === id) {
@@ -783,20 +747,19 @@
             } else {
                 historyList.dataset.expandedId = id;
             }
-            // Rerender to show expanded/collapsed view
             renderHistory();
         }
-
         function renderReadingOutput(readingText) {
             const outputDiv = document.getElementById('reading-output');
             if (!outputDiv) return;
 
+            let headerColor = 'text-indigo-400 border-indigo-500/50';
+            if (state.currentReading.type === 'health') headerColor = 'text-pink-400 border-pink-500/50';
+
             outputDiv.innerHTML = `
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl border border-indigo-700/50 space-y-4">
-                    <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${state.currentReading.title}</h3>
+                    <h3 class="text-2xl font-bold ${headerColor} border-b pb-2">${state.currentReading.title}</h3>
                     <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${readingText}</div>
-                    
-                    <!-- Follow-up Section -->
                     <div class="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
                         <h4 class="font-semibold text-indigo-300 mb-3">Ask a Follow-up Question</h4>
                         <textarea id="follow-up-query" rows="2" placeholder="Ask a specific question based on the reading above..." class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
@@ -805,19 +768,13 @@
                 </div>
             `;
         }
-
         function renderFollowUpOutput(query, answer) {
             const outputDiv = document.getElementById('reading-output');
             if (!outputDiv) return;
-
             const readingBlock = outputDiv.querySelector('.bg-gray-800');
             if (!readingBlock) return;
-
-            // Remove follow-up form after use
             const followUpForm = outputDiv.querySelector('.mt-6.p-4.bg-gray-900');
             if (followUpForm) followUpForm.remove();
-
-            // Append the answer
             const followUpBlock = document.createElement('div');
             followUpBlock.className = 'mt-4 pt-4 border-t border-indigo-700/50 space-y-4';
             followUpBlock.innerHTML = `
@@ -830,49 +787,39 @@
         }
 
         // --- SUBMIT HANDLERS ---
-
         async function handleFollowUp() {
             const followUpQuery = document.getElementById('follow-up-query').value.trim();
             if (!followUpQuery) {
                 showModal('Input Required', 'Please type your follow-up question.', 'error');
                 return;
             }
-
             const currentReading = state.currentReading;
             if (!currentReading || !currentReading.content) {
                 showModal('Error', 'Original reading context is missing.', 'error');
                 return;
             }
-
-            const readingData = { ...currentReading }; // Use the current reading data
-            
+            const readingData = { ...currentReading }; 
             const answer = await generateReading(
                 currentReading.birthDetails,
                 followUpQuery,
                 currentReading.year,
                 currentReading.type, 
-                currentReading.content // Pass the previous reading as context
+                currentReading.content 
             );
-
             if (answer) {
                 renderFollowUpOutput(followUpQuery, answer);
-
-                // Save follow-up answer to history as a new, combined entry
                 const combinedReading = {
                     ...readingData,
-                    content: currentReading.content, // Original reading content
+                    content: currentReading.content, 
                     followUpQuestion: followUpQuery,
                     followUpContent: answer,
                     title: currentReading.title + " (Follow-up)"
                 };
                 await saveReading(combinedReading);
-                
-                // Update local state to reflect the new combined reading
                 state.currentReading.followUpQuestion = followUpQuery;
                 state.currentReading.followUpContent = answer;
             }
         }
-
         function getReadingData(formType) {
             const name = document.getElementById(`${formType}-name`).value.trim();
             const dob = document.getElementById(`${formType}-dob`).value;
@@ -880,14 +827,11 @@
             const city = document.getElementById(`${formType}-city`).value.trim();
             const query = document.getElementById(`${formType}-query`).value.trim();
             const year = formType === 'chart' ? document.getElementById('chart-year').value.trim() : null;
-
             if (!dob || !tob || !city) {
                 showModal('Input Required', 'Date of Birth, Time of Birth, and City are required.', 'error');
                 return null;
             }
-
             const birthDetails = { name, dob, tob, city };
-            
             let title = '';
             if (formType === 'health') {
                 title = 'Holistic Health Profile';
@@ -898,44 +842,27 @@
             } else {
                 title = 'Comprehensive Natal Chart Overview';
             }
-            
             return { birthDetails, query, year, type: formType, title };
         }
-
         async function handleChartSubmit(e) {
             e.preventDefault();
             const readingData = getReadingData('chart');
             if (!readingData) return;
-
             const { birthDetails, query, year, type, title } = readingData;
-            
             const generatedText = await generateReading(birthDetails, query, year, type, null, readingData);
-
             if (generatedText) {
-                // Update state and display output
-                // state.currentReading is set inside generateReading
                 renderReadingOutput(generatedText);
-                
-                // Save to history
                 await saveReading({ ...state.currentReading, userQuery: query || null });
             }
         }
-
         async function handleHealthSubmit(e) {
             e.preventDefault();
             const readingData = getReadingData('health');
             if (!readingData) return;
-
             const { birthDetails, query, type, title } = readingData;
-
             const generatedText = await generateReading(birthDetails, query, null, type, null, readingData);
-
             if (generatedText) {
-                // Update state and display output
-                // state.currentReading is set inside generateReading
                 renderReadingOutput(generatedText);
-                
-                // Save to history
                 await saveReading({ ...state.currentReading, userQuery: query || null });
             }
         }
