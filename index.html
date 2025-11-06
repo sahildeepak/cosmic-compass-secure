@@ -242,8 +242,10 @@
                 reading_details_dob: "DOB: {dob}",
                 reading_details_tob: "TOB: {tob}",
                 reading_details_city: "City: {city}",
-                auth_error_anon_fail: "Error: Could not authenticate with server. Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.",
-                auth_error_config_missing: "Error: Firebase configuration is missing. The app cannot start. Please paste your Firebase project config into the `index.html` file.",
+                auth_error_anon_fail: "Error: Could not authenticate with server.",
+                auth_error_anon_fail_desc: "Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.",
+                auth_error_config_missing: "Error: Firebase configuration is missing.",
+                auth_error_config_missing_desc: "The app cannot start. Please paste your Firebase project config into the `index.html` file.",
             },
             hi: {
                 initializing: "सुरक्षित कनेक्शन प्रारंभ किया जा रहा है...",
@@ -351,8 +353,10 @@
                 reading_details_dob: "जन्म तिथि: {dob}",
                 reading_details_tob: "जन्म समय: {tob}",
                 reading_details_city: "शहर: {city}",
-                auth_error_anon_fail: "त्रुटि: सर्वर से प्रमाणित नहीं हो सका। कृपया सुनिश्चित करें कि आपके फायरबेस प्रोजेक्ट की प्रमाणीकरण सेटिंग्स में **अज्ञात साइन-इन** सक्षम है।",
-                auth_error_config_missing: "त्रुटि: फायरबेस कॉन्फ़िगरेशन गायब है। ऐप शुरू नहीं हो सकता। कृपया अपनी फायरबेस प्रोजेक्ट कॉन्फिग को `index.html` फ़ाइल में पेस्ट करें।",
+                auth_error_anon_fail: "त्रुटि: सर्वर से प्रमाणित नहीं हो सका।",
+                auth_error_anon_fail_desc: "कृपया सुनिश्चित करें कि आपके फायरबेस प्रोजेक्ट की प्रमाणीकरण सेटिंग्स में **अज्ञात साइन-इन** सक्षम है।",
+                auth_error_config_missing: "त्रुटि: फायरबेस कॉन्फ़िगरेशन गायब है।",
+                auth_error_config_missing_desc: "ऐप शुरू नहीं हो सकता। कृपया अपनी फायरबेस प्रोजेक्ट कॉन्फिग को `index.html` फ़ाइल में पेस्ट करें।",
             }
         };
 
@@ -369,7 +373,6 @@
             // Also translate dynamic placeholder text
             renderCurrentView();
         }
-
 
         // --- GLOBAL APP STATE ---
         state = {
@@ -402,18 +405,21 @@
             document.querySelector('#loading-overlay p').textContent = t('loading_generating');
         }
 
-        function showModal(titleKey, contentKey, type = 'info', contentParams = {}) {
+        function showModal(titleKey, content, type = 'info', contentParams = {}) {
             if (state.modalOpen) return; 
             
             const modalContainer = document.getElementById('modal-container');
             let color = type === 'error' ? 'bg-red-900 border-red-500' : 'bg-gray-800 border-indigo-500';
             let titleColor = type === 'error' ? 'text-red-400' : 'text-indigo-400';
 
+            // Check if content is a key or raw text
+            let contentText = (translations[currentLanguage][content] || translations['en'][content]) ? t(content, contentParams) : content;
+
             modalContainer.innerHTML = `
                 <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onclick="closeModal()">
                     <div class="w-11/12 max-w-sm p-6 rounded-xl shadow-2xl ${color} border flex flex-col" style="max-height: 90vh;" onclick="event.stopPropagation()">
                         <h3 class="text-xl font-bold mb-4 ${titleColor}">${t(titleKey)}</h3>
-                        <div class="text-sm text-gray-300 overflow-y-auto">${t(contentKey, contentParams)}</div>
+                        <div class="text-sm text-gray-300 overflow-y-auto">${contentText}</div>
                         <button class="mt-6 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200" onclick="closeModal()">Close</button>
                     </div>
                 </div>
@@ -903,7 +909,7 @@
                 item.className = `bg-gray-800 rounded-xl shadow-lg border border-indigo-700/50 overflow-hidden cursor-pointer transition duration-300 hover:shadow-indigo-500/30`;
                 
                 let detailsHTML = '';
-                if (reading.type === 'matching') {
+                if (reading.type === 'matching' && reading.p2Details) {
                     detailsHTML = `
                         <p class="font-semibold text-indigo-400" data-lang-key="reading_details_p1">${t('reading_details_p1')}</p>
                         <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
@@ -920,7 +926,7 @@
                             <div>${t('reading_details_city', {city: reading.p2Details.city})}</div>
                         </div>
                     `;
-                } else {
+                } else if (reading.birthDetails) {
                      detailsHTML = `
                         <p class="font-semibold text-indigo-400" data-lang-key="reading_details">${t('reading_details')}</p>
                         <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
