@@ -1,0 +1,8 @@
+# This file configures your Netlify deployment settings
+# It MUST be placed in the root of your repository (next to index.html)
+
+[functions]
+  # This sets the timeout for your specific AI function
+  [functions."generateReading"]
+    # Unlocks the 26-second timeout available on Pro plans
+    timeout = 26
