@@ -304,6 +304,7 @@
                 let response = null;
                 let maxRetries = 3;
                 let delay = 1000;
+                let errorText = 'Proxy request failed after retries.'; // Default error
 
                 for (let i = 0; i < maxRetries; i++) {
                     response = await fetch(apiUrl, {
@@ -312,35 +313,40 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (response.ok) break;
+                    if (response.ok) break; // Success, exit the loop
 
+                    // If not ok, handle errors
                     if (response.status === 429 && i < maxRetries - 1) { 
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
-                        continue;
+                        continue; // Retry
                     }
                     
                     // --- ROBUST ERROR HANDLING FIX ---
-                    let errorText = `Proxy request failed with status: ${response.status}`;
+                    // This block now ONLY runs if the response is not OK and not a 429
+                    errorText = `Proxy request failed with status: ${response.status}`;
                     try {
-                        const rawError = await response.text(); 
+                        const rawError = await response.text(); // Read the body as text ONCE
                         try {
                             const errorResult = JSON.parse(rawError);
                             errorText = errorResult.error || rawError;
                         } catch (e) {
-                            errorText = rawError;
+                            errorText = rawError; // Use the raw text if it's not JSON
                         }
                     } catch (e) {
                         console.error("Could not read error response body:", e);
                     }
+                    // We throw here to be caught by the final catch block
                     throw new Error(errorText); 
                 }
 
+                // This check is for if the loop finishes without success
                 if (!response.ok) {
-                    throw new Error("Failed to get a successful response from the server after retries.");
+                    throw new Error(errorText);
                 }
 
-                const result = await response.json();
+                // --- Success Path ---
+                const result = await response.json(); // This is now safe, body was not read
                 
                 if (result.error) {
                     throw new Error(result.error);
@@ -490,6 +496,7 @@
         }
         function renderCurrentView() {
             if (!isAuthReady || !db) {
+                 // The initial splash screen will just stay visible if this fails
                  console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
                  return;
             }
@@ -766,8 +773,82 @@
         
         // --- INITIALIZATION ---
         
-        // No window.onload is needed because the initial render
-        // is now triggered by the onAuthStateChanged listener in the module script.
+        // Mandated Global Variables Check
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        
+        // PASTE YOUR FIREBASE CONFIG OBJECT HERE
+        const firebaseConfig = {
+          apiKey: "AIzaSyD_hTndy6xst4f8hxAbJ42R9sX_82BMFdc",
+          authDomain: "cosmic-compass-dbc12.firebaseapp.com",
+          projectId: "cosmic-compass-dbc12",
+          storageBucket: "cosmic-compass-dbc12.firebasestorage.app",
+          messagingSenderId: "1077342508451",
+          appId: "1:1077342508451:web:b3896f9add3003ba80f616",
+          measurementId: "G-9QDKQVFJ1Y"
+        };
+        
+        // We set initialAuthToken to null because it doesn't exist on Netlify
+        const initialAuthToken = null; 
+
+        // Check if the config has been filled
+        if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
+            setLogLevel('debug'); // Enable Firestore logging for debugging
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            
+            // 1. Initial Authentication and Listener Setup
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    userId = user.uid;
+                } else {
+                    // Sign in anonymously if no user is found
+                    try {
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser?.uid || crypto.randomUUID();
+                    } catch (error) {
+                        console.error("Anonymous sign-in failed:", error);
+                        // This is the error you were seeing: auth/configuration-not-found
+                        // This MUST be fixed by ENABLING Anonymous Sign-In in your Firebase project.
+                        document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
+                            <h3 class="font-bold text-red-300 text-lg">Error: Could not authenticate with server.</h3>
+                            <p class="text-red-200 mt-2">Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.</p>
+                        </div>`;
+                        return; // Stop app initialization
+                    }
+                }
+                
+                isAuthReady = true;
+                
+                // Once authenticated, load user profile and set up history listener
+                await loadUserProfile();
+                setupHistoryListener();
+                
+                console.log("Firebase initialized. User ID:", userId);
+
+                // *** THIS IS THE LOGIC FIX ***
+                // ONLY render the initial view AFTER auth is confirmed.
+                switchView('home'); 
+            });
+
+            // Handle the case where there is no pre-existing auth token
+            if (!initialAuthToken && !auth.currentUser) {
+                // Trigger anonymous sign-in immediately
+                // The onAuthStateChanged listener will catch this.
+                signInAnonymously(auth).catch(e => {
+                    console.error("Initial anonymous sign-in trigger failed:", e);
+                    // This error will be handled by the onAuthStateChanged listener's catch block
+                });
+            }
+
+        } else {
+            console.error("Firebase config is missing. Please paste your Firebase project config into index.html.");
+            // If Firebase is missing, show a clear error.
+            document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
+                <h3 class="font-bold text-red-300 text-lg">Error: Firebase configuration is missing.</h3>
+                <p class="text-red-200 mt-2">The app cannot start. Please paste your Firebase project config into the \`index.html\` file.</p>
+            </div>`;
+        }
 
     </script>
 </body>
