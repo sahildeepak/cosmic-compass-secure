@@ -24,12 +24,26 @@ exports.handler = async (event, context) => {
 
     // 2. Parse Client Request Data (Security/Validation)
     if (event.httpMethod !== 'POST' || !event.body) {
-        return { statusCode: 400, body: 'Invalid request method or missing body.' };
+        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid request method or missing body.' }) };
+    }
+
+    let clientData;
+    try {
+        clientData = JSON.parse(event.body);
+    } catch (e) {
+        return { statusCode: 400, body: JSON.stringify({ error: 'Invalid JSON body.' }) };
     }
 
     try {
-        const clientData = JSON.parse(event.body);
         const { birthDetails, userQuery, yearInput, readingType, previousReading } = clientData;
+
+        // *** ROBUSTNESS FIX: Validate required data ***
+        if (!birthDetails || !birthDetails.dob || !birthDetails.tob || !birthDetails.city) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: 'Invalid request: Missing required birth details (dob, tob, city).' })
+            };
+        }
 
         // 3. Build the System Instruction (The Core Logic - Hidden from Client)
         let systemPrompt = '';
@@ -37,7 +51,7 @@ exports.handler = async (event, context) => {
 
         const chartString = 
             `\n--- CHART DATA ---\n` +
-            `Name: ${birthDetails.name}\n` +
+            `Name: ${birthDetails.name || 'N/A'}\n` +
             `DOB: ${birthDetails.dob}\n` +
             `TOB: ${birthDetails.tob}\n` +
             `City: ${birthDetails.city}\n` +
@@ -78,11 +92,28 @@ exports.handler = async (event, context) => {
             body: JSON.stringify(payload)
         });
 
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error("Gemini API Error:", errorBody);
+            return {
+                statusCode: response.status,
+                body: JSON.stringify({ error: `Gemini API Error: ${errorBody}` })
+            };
+        }
+
         const result = await response.json();
         
         // 6. Return ONLY the AI's response to the client
         const candidate = result.candidates?.[0];
-        const generatedText = candidate?.content?.parts?.[0]?.text || "Error: Could not retrieve AI content.";
+        const generatedText = candidate?.content?.parts?.[0]?.text;
+
+        if (!generatedText) {
+             console.error("No text generated, candidate:", candidate);
+             return {
+                statusCode: 500,
+                body: JSON.stringify({ error: 'AI failed to generate content. This might be due to safety settings.' })
+            };
+        }
 
         return {
             statusCode: 200,
@@ -95,7 +126,7 @@ exports.handler = async (event, context) => {
             }),
         };
 
-    } catch (error) {
+    } catch (error) { // <--- THIS IS THE FIX
         console.error("Proxy error:", error);
         return {
             statusCode: 500,
