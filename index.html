@@ -7,7 +7,7 @@
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar for a sleek look */
+        /* ... existing styles ... */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #818CF8; border-radius: 2px; }
         ::-webkit-scrollbar-track { background: #0F172A; }
@@ -18,21 +18,18 @@
             color: #E2E8F0; /* Light text */
             min-height: 100vh;
         }
-        /* Mobile-first main container styling */
         .main-container {
             max-width: 640px;
             margin: 0 auto;
             padding-bottom: 72px; /* Space for fixed bottom nav */
         }
-        /* Custom slow spin for the initial loading screen logo */
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
         .animate-spin-slow {
-            animation: spin-slow 2s linear infinite;
+            animation: spin-slow 3s linear infinite;
         }
-        /* Enhanced Hero SVG styling */
         .cosmic-hero {
             filter: drop-shadow(0 0 10px rgba(129, 140, 248, 0.5)); /* Subtle neon glow */
         }
@@ -70,35 +67,54 @@
 
         <!-- FIXED BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl border-t border-indigo-700/50 z-20">
-            <div class="max-w-md mx-auto flex justify-around items-center h-16">
+            <!-- UPDATED: 6-item grid for navigation -->
+            <div class="max-w-md mx-auto grid grid-cols-6 items-center h-16">
                 <!-- HOME Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="home" onclick="switchView('home')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span class="mt-1">Home</span>
+                    <span class="mt-1 text-xs">Home</span>
                 </button>
                 
                 <!-- CHART Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="chart" onclick="switchView('chart')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"/><path d="M12 2v10"/><path d="M18.4 6.6l-2.1 2.1"/><path d="M5.6 6.6l2.1 2.1"/></svg>
-                    <span class="mt-1">Chart</span>
+                    <span class="mt-1 text-xs">Chart</span>
                 </button>
                 
                 <!-- HEALTH Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-pink-300" data-view="health" onclick="switchView('health')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M20.5 2L15 6.5l-3-3L2 12l9.5 9.5 3-3L17.5 20l4.5-5.5z"/><path d="M12 12l-7-7"/></svg>
-                    <span class="mt-1">Health</span>
+                    <span class="mt-1 text-xs">Health</span>
                 </button>
 
                 <!-- KUNDALI MATCHING Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-amber-300" data-view="matching" onclick="switchView('matching')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M14.5 9.5a3.5 3.5 0 0 0 0 7"/><path d="M9.5 9.5a3.5 3.5 0 0 1 0 7"/><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/></svg>
-                    <span class="mt-1">Matching</span>
+                    <span class="mt-1 text-xs">Matching</span>
+                </button>
+
+                <!-- NEW: FORECASTS Button (Daily + Numerology) -->
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-cyan-300" data-view="forecasts" onclick="switchView('forecasts')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                        <path d="M12 3v1"/>
+                        <path d="M18.36 5.64l-.7-.7"/>
+                        <path d="M21 12h-1"/>
+                        <path d="M18.36 18.36l-.7-.7"/>
+                        <path d="M12 21v-1"/>
+                        <path d="M5.64 18.36l.7-.7"/>
+                        <path d="M3 12h1"/>
+                        <path d="M5.64 5.64l.7.7"/>
+                        <path d="M12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                        <path d="M12 18v1"/>
+                        <path d="M12 5V4"/>
+                    </svg>
+                    <span class="mt-1 text-xs">Forecasts</span>
                 </button>
                 
                 <!-- HISTORY Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-teal-300" data-view="history" onclick="switchView('history')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 21a9 9 0 0 0 9-9h-2a7 7 0 0 1-7 7V12h-2V7h2V5H9a9 9 0 0 0-9 9z"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span class="mt-1">History</span>
+                    <span class="mt-1 text-xs">History</span>
                 </button>
             </div>
         </nav>
@@ -106,8 +122,8 @@
         <!-- Modals and Overlays -->
         <div id="modal-container"></div>
         <div id="loading-overlay" class="fixed inset-0 bg-gray-900/70 flex items-center justify-center hidden z-50">
+            <!-- ... existing loading overlay HTML ... -->
             <div class="flex flex-col items-center p-8 bg-gray-800 rounded-2xl shadow-2xl border border-indigo-500 transform scale-105">
-                <!-- Attractive Loading Indicator -->
                 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 animate-spin-slow mb-4">
                     <path d="M12 2a10 10 0 0 0 9.071 5.378 10 10 0 0 1-5.698 12.33 10 10 0 0 0-3.373-1.077c-.504-.085-1.15-.027-1.503.208-.475.313-.604.912-.34 1.488.267.591.956.883 1.57.653A10 10 0 0 0 12 2z"/>
                     <path d="M12 2v20"/><path d="M4.22 4.22l15.56 15.56M4.22 19.78l15.56-15.56"/>
@@ -119,9 +135,7 @@
     </div>
 
     <!-- 
-      *** THE FIX IS HERE ***
-      All JavaScript is now inside ONE single <script type="module"> block.
-      This guarantees Firebase is loaded and ready before any app logic runs.
+      *** ALL SCRIPT LOGIC IS NOW IN THIS SINGLE MODULE ***
     -->
     <script type="module">
         // --- Firebase SDK Imports ---
@@ -191,7 +205,10 @@
         window.handleFollowUp = handleFollowUp;
         window.handleChartSubmit = handleChartSubmit;
         window.handleHealthSubmit = handleHealthSubmit;
-        window.handleMatchingSubmit = handleMatchingSubmit; // Added for matching
+        window.handleMatchingSubmit = handleMatchingSubmit;
+        // NEW handlers for new forms
+        window.handleHoroscopeSubmit = handleHoroscopeSubmit;
+        window.handleNumerologySubmit = handleNumerologySubmit;
 
 
         // --- FIREBASE / DATA MANAGEMENT ---
@@ -475,19 +492,25 @@
                 const itemView = item.dataset.view;
                 if (itemView === view) {
                     item.classList.add('font-bold');
-                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-amber-300', 'hover:text-teal-300');
+                    // Remove all potential hover colors
+                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-amber-300', 'hover:text-teal-300', 'hover:text-cyan-300');
+                    // Add the active color
                     if(view === 'home') item.classList.add('text-indigo-400');
                     if(view === 'chart') item.classList.add('text-indigo-400');
                     if(view === 'health') item.classList.add('text-pink-400');
                     if(view === 'matching') item.classList.add('text-amber-400');
+                    if(view === 'forecasts') item.classList.add('text-cyan-400'); // NEW
                     if(view === 'history') item.classList.add('text-teal-400');
                 } else {
-                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-amber-400', 'text-teal-400', 'font-bold');
+                    // Reset all other tabs
+                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-amber-400', 'text-teal-400', 'text-cyan-400', 'font-bold');
                     item.classList.add('text-gray-400');
+                    // Add back the correct hover color
                     if(itemView === 'home') item.classList.add('hover:text-indigo-300');
                     if(itemView === 'chart') item.classList.add('hover:text-indigo-300');
                     if(itemView === 'health') item.classList.add('hover:text-pink-300');
                     if(itemView === 'matching') item.classList.add('hover:text-amber-300');
+                    if(itemView === 'forecasts') item.classList.add('hover:text-cyan-300'); // NEW
                     if(itemView === 'history') item.classList.add('hover:text-teal-300');
                 }
             });
@@ -511,6 +534,9 @@
                     break;
                 case 'matching':
                     renderMatchingForm();
+                    break;
+                case 'forecasts': // NEW
+                    renderForecastsPage();
                     break;
                 case 'history':
                     renderHistory();
@@ -549,6 +575,7 @@
                                 <li class="flex items-center"><span class="text-indigo-400 mr-3">Chart:</span> Comprehensive natal chart, annual forecasts, and specific life queries.</li>
                                 <li class="flex items-center"><span class="text-pink-400 mr-3">Health:</span> Astrological insights into your vitality, strengths, and holistic well-being.</li>
                                 <li class="flex items-center"><span class="text-amber-400 mr-3">Matching:</span> Detailed Kundali matching (Ashtakoot Milan) for compatibility.</li>
+                                <li class="flex items-center"><span class="text-cyan-400 mr-3">Forecasts:</span> Daily Horoscopes and personal Numerology reports.</li>
                                 <li class="flex items-center"><span class="text-teal-400 mr-3">History:</span> Save and review your personalized readings (automatically saved to your private cloud history).</li>
                             </ul>
                         </div>
@@ -567,8 +594,11 @@
                 <div class="space-y-3">
                     <input type="text" id="${formType}-name${partnerSuffix}" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     <input type="date" id="${formType}-dob${partnerSuffix}" placeholder="Date of Birth" value="${p.dob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    
+                    ${formType !== 'numerology' ? `
                     <input type="time" id="${formType}-tob${partnerSuffix}" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     <input type="text" id="${formType}-city${partnerSuffix}" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                    ` : ''}
                     
                     ${showAdvancedFields ? `
                         ${formType === 'chart' ? `
@@ -580,6 +610,7 @@
             `;
         }
         function renderChartForm() {
+            // ... (existing renderChartForm function is correct) ...
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <h2 class="text-3xl font-bold text-indigo-300 mb-6 border-b border-indigo-700/50 pb-2">Natal Chart & Forecast</h2>
@@ -594,6 +625,7 @@
             state.currentReading = null; 
         }
         function renderHealthForm() {
+            // ... (existing renderHealthForm function is correct) ...
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <h2 class="text-3xl font-bold text-pink-300 mb-6 border-b border-pink-700/50 pb-2">Holistic Health Profile</h2>
@@ -608,6 +640,7 @@
             state.currentReading = null;
         }
         function renderMatchingForm() {
+            // ... (existing renderMatchingForm function is correct) ...
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <h2 class="text-3xl font-bold text-amber-300 mb-6 border-b border-amber-700/50 pb-2">Kundali Matching</h2>
@@ -634,7 +667,52 @@
             state.currentReading = null;
         }
 
+        // --- NEW: Render Function for Forecasts Page ---
+        function renderForecastsPage() {
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <h2 class="text-3xl font-bold text-cyan-300 mb-6 border-b border-cyan-700/50 pb-2">Daily Forecasts & Numerology</h2>
+                
+                <!-- Daily Horoscope Section -->
+                <form id="horoscope-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl mb-8">
+                    <h3 class="text-xl font-bold text-cyan-300 mb-3">Daily Sun Sign Horoscope</h3>
+                    <p class="text-sm text-gray-400 mb-4">Get a quick prediction for today based on your Sun Sign.</p>
+                    <select id="horoscope-sign" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                        <option value="">Select your Sun Sign...</option>
+                        <option value="Aries">Aries</option>
+                        <option value="Taurus">Taurus</option>
+                        <option value="Gemini">Gemini</option>
+                        <option value="Cancer">Cancer</option>
+                        <option value="Leo">Leo</option>
+                        <option value="Virgo">Virgo</option>
+                        <option value="Libra">Libra</option>
+                        <option value="Scorpio">Scorpio</option>
+                        <option value="Sagittarius">Sagittarius</option>
+                        <option value="Capricorn">Capricorn</option>
+                        <option value="Aquarius">Aquarius</option>
+                        <option value="Pisces">Pisces</option>
+                    </select>
+                    <button type="submit" class="w-full p-3 mt-5 bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Get Daily Horoscope</button>
+                </form>
+
+                <!-- Numerology Section -->
+                <form id="numerology-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl">
+                    <h3 class="text-xl font-bold text-cyan-300 mb-3">Numerology Report</h3>
+                    <p class="text-sm text-gray-400 mb-4">Get your Life Path, Destiny, and Soul Urge numbers based on your full name and date of birth.</p>
+                    <!-- Note: Using 'numerology' as formType for getFormFields -->
+                    ${getFormFields('numerology')}
+                    <button type="submit" class="w-full p-3 mt-5 bg-cyan-600 hover:bg-cyan-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Get Numerology Report</button>
+                </form>
+
+                <div id="reading-output" class="mt-8"></div>
+            `;
+            document.getElementById('horoscope-form').addEventListener('submit', handleHoroscopeSubmit);
+            document.getElementById('numerology-form').addEventListener('submit', handleNumerologySubmit);
+            state.currentReading = null;
+        }
+
         function renderHistory() {
+            // ... (existing renderHistory function is correct, but needs new types) ...
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <h2 class="text-3xl font-bold text-teal-300 mb-6 border-b border-teal-700/50 pb-2">Reading History</h2>
@@ -650,23 +728,59 @@
                 
                 let title = 'Reading';
                 let subtitle = reading.type ? reading.type.toUpperCase() : 'N/A';
-                
+                let detailsHTML = '';
+
                 if (reading.type === 'matching') {
                     title = 'Kundali Match Report';
                     subtitle = `${reading.birthDetailsPartner1.name || 'P1'} & ${reading.birthDetailsPartner2.name || 'P2'}`;
-                } else if (reading.type === 'health') {
-                    title = 'Health Profile';
+                    detailsHTML = `
+                        <p class="font-semibold text-indigo-400">Partner 1 Details:</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
+                            <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
+                            <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
+                            <div>City: ${reading.birthDetailsPartner1.city}</div>
+                        </div>
+                        <p class="font-semibold text-indigo-400 mt-2">Partner 2 Details:</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>Name: ${reading.birthDetailsPartner2.name || 'N/A'}</div>
+                            <div>DOB: ${reading.birthDetailsPartner2.dob}</div>
+                            <div>TOB: ${reading.birthDetailsPartner2.tob}</div>
+                            <div>City: ${reading.birthDetailsPartner2.city}</div>
+                        </div>
+                    `;
+                } else if (reading.type === 'health' || reading.type === 'chart') {
+                    if (reading.type === 'health') title = 'Health Profile';
+                    else if (reading.year) title = `Annual Forecast (${reading.year})`;
+                    else if (reading.userQuery) title = 'Targeted Chart Query';
+                    else title = 'Natal Chart Overview';
+                    
                     subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : `For ${reading.birthDetailsPartner1.name || 'User'}`;
-                } else if (reading.type === 'chart') {
-                    if (reading.year) {
-                        title = `Annual Forecast (${reading.year})`;
-                    } else if (reading.userQuery) {
-                        title = 'Targeted Chart Query';
-                    } else {
-                        title = 'Natal Chart Overview';
-                    }
-                    subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : `For ${reading.birthDetailsPartner1.name || 'User'}`;
+                    detailsHTML = `
+                        <p class="font-semibold text-indigo-400">Birth Details:</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
+                            <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
+                            <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
+                            <div>City: ${reading.birthDetailsPartner1.city}</div>
+                        </div>
+                    `;
+                } else if (reading.type === 'daily_horoscope') {
+                    title = `Daily Horoscope: ${reading.zodiacSign}`;
+                    subtitle = `For ${new Date(reading.timestamp).toLocaleDateString()}`;
+                    detailsHTML = `<p class="font-semibold text-indigo-400">Sign: ${reading.zodiacSign}</p>`;
+                } else if (reading.type === 'numerology') {
+                    title = 'Numerology Report';
+                    subtitle = `For ${reading.numerologyDetails.name}`;
+                    detailsHTML = `
+                        <p class="font-semibold text-indigo-400">Details:</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                            <div>Name: ${reading.numerologyDetails.name}</div>
+                            <div>DOB: ${reading.numerologyDetails.dob}</div>
+                        </div>
+                    `;
                 }
+
 
                 const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
                 const item = document.createElement('div');
@@ -682,32 +796,7 @@
                     </div>
                     ${isExpanded ? `
                         <div class="p-4 pt-0 text-sm text-gray-300 bg-gray-900 border-t border-indigo-700/50 space-y-4">
-                            
-                            ${reading.type === 'matching' ? `
-                                <p class="font-semibold text-indigo-400">Partner 1 Details:</p>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                    <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
-                                    <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
-                                    <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
-                                    <div>City: ${reading.birthDetailsPartner1.city}</div>
-                                </div>
-                                <p class="font-semibold text-indigo-400 mt-2">Partner 2 Details:</p>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                    <div>Name: ${reading.birthDetailsPartner2.name || 'N/A'}</div>
-                                    <div>DOB: ${reading.birthDetailsPartner2.dob}</div>
-                                    <div>TOB: ${reading.birthDetailsPartner2.tob}</div>
-                                    <div>City: ${reading.birthDetailsPartner2.city}</div>
-                                </div>
-                            ` : `
-                                <p class="font-semibold text-indigo-400">Birth Details:</p>
-                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                                    <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
-                                    <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
-                                    <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
-                                    <div>City: ${reading.birthDetailsPartner1.city}</div>
-                                </div>
-                            `}
-
+                            ${detailsHTML}
                             <p class="font-semibold text-indigo-400 mt-4">Reading:</p>
                             <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.content || 'No content.'}</div>
                             
@@ -743,8 +832,8 @@
                     <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${readingData.title}</h3>
                     <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${readingText}</div>
                     
-                    <!-- Follow-up Section (Not available for matching) -->
-                    ${readingData.type !== 'matching' ? `
+                    <!-- Follow-up Section (Not available for matching, forecasts, or numerology) -->
+                    ${(readingData.type === 'chart' || readingData.type === 'health') ? `
                     <div class="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
                         <h4 class="font-semibold text-indigo-300 mb-3">Ask a Follow-up Question</h4>
                         <textarea id="follow-up-query" rows="2" placeholder="Ask a specific question based on the reading above..." class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
@@ -813,7 +902,7 @@
         function getReadingData(formType) {
             let birthDetailsPartner1 = {};
             let birthDetailsPartner2 = {};
-            let query = '', year = '', title = '';
+            let query = '', year = '', title = '', zodiacSign = '', numerologyDetails = {};
 
             if (formType === 'chart' || formType === 'health') {
                 birthDetailsPartner1.name = document.getElementById(`${formType}-name`).value.trim();
@@ -830,34 +919,47 @@
                     return null;
                 }
                 
-                if (formType === 'health') {
-                    title = 'Holistic Health Profile';
-                } else if (year) {
-                    title = `Annual Forecast for ${year}`;
-                } else if (query) {
-                    title = `Targeted Chart Query`;
-                } else {
-                    title = 'Comprehensive Natal Chart Overview';
-                }
+                if (formType === 'health') title = 'Holistic Health Profile';
+                else if (year) title = `Annual Forecast for ${year}`;
+                else if (query) title = `Targeted Chart Query`;
+                else title = 'Comprehensive Natal Chart Overview';
+            
             } else if (formType === 'matching') {
-                birthDetailsPartner1.name = document.getElementById(`matching-name1`).value.trim();
-                birthDetailsPartner1.dob = document.getElementById(`matching-dob1`).value;
-                birthDetailsPartner1.tob = document.getElementById(`matching-tob1`).value;
-                birthDetailsPartner1.city = document.getElementById(`matching-city1`).value.trim();
+                birthDetailsPartner1.name = document.getElementById(`matching-1-name`).value.trim();
+                birthDetailsPartner1.dob = document.getElementById(`matching-1-dob`).value;
+                birthDetailsPartner1.tob = document.getElementById(`matching-1-tob`).value;
+                birthDetailsPartner1.city = document.getElementById(`matching-1-city`).value.trim();
                 
-                birthDetailsPartner2.name = document.getElementById(`matching-name2`).value.trim();
-                birthDetailsPartner2.dob = document.getElementById(`matching-dob2`).value;
-                birthDetailsPartner2.tob = document.getElementById(`matching-tob2`).value;
-                birthDetailsPartner2.city = document.getElementById(`matching-city2`).value.trim();
+                birthDetailsPartner2.name = document.getElementById(`matching-2-name`).value.trim();
+                birthDetailsPartner2.dob = document.getElementById(`matching-2-dob`).value;
+                birthDetailsPartner2.tob = document.getElementById(`matching-2-tob`).value;
+                birthDetailsPartner2.city = document.getElementById(`matching-2-city`).value.trim();
 
                 if (!birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city || !birthDetailsPartner2.dob || !birthDetailsPartner2.tob || !birthDetailsPartner2.city) {
                     showModal('Input Required', 'All birth details for both partners are required.', 'error');
                     return null;
                 }
                 title = `Kundali Match: ${birthDetailsPartner1.name || 'P1'} & ${birthDetailsPartner2.name || 'P2'}`;
+            
+            } else if (formType === 'daily_horoscope') {
+                zodiacSign = document.getElementById('horoscope-sign').value;
+                if (!zodiacSign) {
+                    showModal('Input Required', 'Please select a Zodiac sign.', 'error');
+                    return null;
+                }
+                title = `Today's Horoscope for ${zodiacSign}`;
+            
+            } else if (formType === 'numerology') {
+                numerologyDetails.name = document.getElementById('numerology-name').value.trim();
+                numerologyDetails.dob = document.getElementById('numerology-dob').value;
+                if (!numerologyDetails.name || !numerologyDetails.dob) {
+                    showModal('Input Required', 'Full Name and Date of Birth are required for a numerology report.', 'error');
+                    return null;
+                }
+                title = `Numerology Report for ${numerologyDetails.name}`;
             }
             
-            return { birthDetailsPartner1, birthDetailsPartner2, query, year, type: formType, title };
+            return { birthDetailsPartner1, birthDetailsPartner2, query, year, type: formType, title, zodiacSign, numerologyDetails };
         }
 
         async function handleChartSubmit(e) {
@@ -910,6 +1012,40 @@
             if (generatedText) {
                 renderReadingOutput(generatedText, state.currentReading);
                 await saveReading({ ...state.currentReading });
+            }
+        }
+
+        // --- NEW: Handlers for Forecasts Page ---
+        async function handleHoroscopeSubmit(e) {
+            e.preventDefault();
+            const readingData = getReadingData('daily_horoscope');
+            if (!readingData) return;
+            
+            const payload = {
+                readingType: 'daily_horoscope',
+                zodiacSign: readingData.zodiacSign
+            };
+
+            const generatedText = await generateReading(payload, readingData);
+            if (generatedText) {
+                renderReadingOutput(generatedText, state.currentReading);
+                await saveReading({ ...state.currentReading, zodiacSign: readingData.zodiacSign });
+            }
+        }
+        async function handleNumerologySubmit(e) {
+            e.preventDefault();
+            const readingData = getReadingData('numerology');
+            if (!readingData) return;
+            
+            const payload = {
+                readingType: 'numerology',
+                numerologyDetails: readingData.numerologyDetails
+            };
+
+            const generatedText = await generateReading(payload, readingData);
+            if (generatedText) {
+                renderReadingOutput(generatedText, state.currentReading);
+                await saveReading({ ...state.currentReading, numerologyDetails: readingData.numerologyDetails });
             }
         }
         

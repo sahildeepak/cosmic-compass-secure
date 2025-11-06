@@ -36,13 +36,14 @@ exports.handler = async (event, context) => {
 
     try {
         // --- UPDATED: Now receives Partner 1 and (optionally) Partner 2 ---
-        const { birthDetailsPartner1, birthDetailsPartner2, userQuery, yearInput, readingType, previousReading } = clientData;
+        const { birthDetailsPartner1, birthDetailsPartner2, userQuery, yearInput, readingType, previousReading, zodiacSign, numerologyDetails } = clientData;
 
         // *** ROBUSTNESS FIX: Validate required data ***
-        if (!birthDetailsPartner1 || !birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city) {
-            return {
+        // Basic validation (can be expanded)
+        if (!readingType) {
+             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: 'Invalid request: Missing required birth details for Partner 1 (dob, tob, city).' })
+                body: JSON.stringify({ error: 'Invalid request: Missing required readingType.' })
             };
         }
         
@@ -53,14 +54,16 @@ exports.handler = async (event, context) => {
         // *** MARKDOWN BUG FIX ***
         const formattingRule = "Do not use Markdown, headers, lists, or asterisks for bolding. Respond in plain, natural language paragraphs, separated by a single newline.";
 
-        // --- UPDATED: Chart String for Partner 1 ---
-        const chartStringP1 = 
-            `\n--- CHART DATA (PARTNER 1) ---\n` +
-            `Name: ${birthDetailsPartner1.name || 'N/A'}\n` +
-            `DOB: ${birthDetailsPartner1.dob}\n` +
-            `TOB: ${birthDetailsPartner1.tob}\n` +
-            `City: ${birthDetailsPartner1.city}\n` +
-            `--- END CHART DATA (PARTNER 1) ---`;
+        let chartStringP1 = '';
+        if (birthDetailsPartner1) {
+            chartStringP1 = 
+                `\n--- CHART DATA (PARTNER 1) ---\n` +
+                `Name: ${birthDetailsPartner1.name || 'N/A'}\n` +
+                `DOB: ${birthDetailsPartner1.dob}\n` +
+                `TOB: ${birthDetailsPartner1.tob}\n` +
+                `City: ${birthDetailsPartner1.city}\n` +
+                `--- END CHART DATA (PARTNER 1) ---`;
+        }
             
         let chartStringP2 = '';
             
@@ -99,6 +102,30 @@ exports.handler = async (event, context) => {
             systemPrompt = `You are an expert annual forecaster specializing in Solar Return charts and major transits. Analyze the natal chart for the year ${yearInput}. Focus on major themes, areas of opportunity (Jupiter/Venus transits), and areas requiring caution (Saturn/Mars transits) for the native during that period. ${formattingRule}`;
             userPrompt = `Generate the annual forecast for the year ${yearInput} based on the chart data.`;
         
+        // --- NEW: Daily Horoscope Logic ---
+        } else if (readingType === 'daily_horoscope') {
+            systemPrompt = `You are a concise and insightful astrologer. Provide a 3-paragraph daily horoscope for the given Sun Sign for today. Focus on love, career, and health. ${formattingRule}`;
+            userPrompt = `Generate today's daily horoscope for ${zodiacSign}.`;
+            chartStringP1 = ''; // No chart data needed
+
+        // --- NEW: Numerology Logic ---
+        } else if (readingType === 'numerology') {
+            if (!numerologyDetails || !numerologyDetails.name || !numerologyDetails.dob) {
+                 return {
+                    statusCode: 400,
+                    body: JSON.stringify({ error: 'Invalid request: Missing required name and DOB for numerology.' })
+                };
+            }
+            systemPrompt = `You are an expert numerologist. Analyze the user's full name and date of birth. Calculate and provide a detailed explanation for their:
+1.  Life Path Number (from DOB)
+2.  Destiny (or Expression) Number (from full name)
+3.  Soul Urge (or Heart's Desire) Number (from vowels in name)
+Provide a final summary paragraph. ${formattingRule}`;
+            userPrompt = `Generate a full numerology report for:
+Full Name: ${numerologyDetails.name}
+Date of Birth: ${numerologyDetails.dob}`;
+            chartStringP1 = ''; // No chart data needed
+
         } else {
             // Natal Chart Overview System Prompt (Default)
             systemPrompt = `You are a world-class, insightful astrologer. Generate a comprehensive Natal Chart Overview, covering the native's sun, moon, and rising sign, along with key planetary aspects that define their personality, career approach, and emotional nature. Keep the tone warm and empowering. ${formattingRule}`;
