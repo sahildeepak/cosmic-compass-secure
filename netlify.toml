@@ -1,8 +1,8 @@
-# This file configures your Netlify deployment settings
-# It MUST be placed in the root of your repository (next to index.html)
-
+# This file tells Netlify to increase the timeout for your function
 [functions]
-  # This sets the timeout for your specific AI function
-  [functions."generateReading"]
-    # Unlocks the 26-second timeout available on Pro plans
-    timeout = 26
+  # Set the timeout to 26 seconds (the max for Pro plan sync functions)
+  timeout = 26
+
+# Specific configuration for your generateReading function
+[functions."generateReading"]
+  timeout = 26

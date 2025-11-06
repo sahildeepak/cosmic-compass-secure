@@ -81,7 +81,8 @@ exports.handler = async (event, context) => {
                 `City: ${birthDetailsPartner2.city}\n` +
                 `--- END CHART DATA (PARTNER 2) ---`;
 
-            systemPrompt = `You are an expert Vedic astrologer specializing in Kundali Matching (Ashtakoot Milan). Analyze the birth charts of both individuals. Provide a compatibility score (Guna Milan) out of 36. Then, provide a detailed paragraph for each of the 8 Kootas (Varna, Vasya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi). Finally, give a concluding summary of the match, highlighting strengths, weaknesses, and a final verdict (e.g., Excellent, Good, Average, Challenging). ${formattingRule}`;
+            // *** PRO VERSION PROMPT: Reverted to the detailed, high-quality prompt. ***
+            systemPrompt = `You are an expert Vedic astrologer specializing in Kundali Matching (Ashtakoot Milan). Analyze the birth charts of both individuals. Provide a compatibility score (Guna Milan) out of 36. Then, provide a **detailed paragraph for each** of the 8 Kootas (Varna, Vasya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi). Finally, give a **detailed concluding summary** of the match, highlighting strengths, weaknesses, and a final verdict (e.g., Excellent, Good, Average, Challenging). ${formattingRule}`;
             userPrompt = `Generate a full Kundali matching report for Partner 1 and Partner 2 based on their chart data.`;
         
         } else if (readingType === 'health') {

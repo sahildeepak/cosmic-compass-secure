@@ -68,37 +68,37 @@
             </div>
         </main>
 
-        <!-- FIXED BOTTOM NAVIGATION (NOW 5 TABS) -->
+        <!-- FIXED BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl border-t border-indigo-700/50 z-20">
             <div class="max-w-md mx-auto flex justify-around items-center h-16">
                 <!-- HOME Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="home" onclick="switchView('home')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                    <span class="mt-1 text-xs">Home</span>
+                    <span class="mt-1">Home</span>
                 </button>
                 
                 <!-- CHART Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-indigo-300" data-view="chart" onclick="switchView('chart')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="12" cy="12" r="10"/><path d="M12 2v10"/><path d="M18.4 6.6l-2.1 2.1"/><path d="M5.6 6.6l2.1 2.1"/></svg>
-                    <span class="mt-1 text-xs">Chart</span>
+                    <span class="mt-1">Chart</span>
                 </button>
                 
                 <!-- HEALTH Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-pink-300" data-view="health" onclick="switchView('health')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M20.5 2L15 6.5l-3-3L2 12l9.5 9.5 3-3L17.5 20l4.5-5.5z"/><path d="M12 12l-7-7"/></svg>
-                    <span class="mt-1 text-xs">Health</span>
-                </button>
-                
-                <!-- NEW: MATCHING Button -->
-                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-red-300" data-view="matching" onclick="switchView('matching')">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87"/><path d="M16.5 7a4 4 0 0 1 0 8"/></svg>
-                    <span class="mt-1 text-xs">Matching</span>
+                    <span class="mt-1">Health</span>
                 </button>
 
+                <!-- KUNDALI MATCHING Button -->
+                <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-amber-300" data-view="matching" onclick="switchView('matching')">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M14.5 9.5a3.5 3.5 0 0 0 0 7"/><path d="M9.5 9.5a3.5 3.5 0 0 1 0 7"/><path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 1 0 0-8c-2 0-4 1.33-6 4Z"/></svg>
+                    <span class="mt-1">Matching</span>
+                </button>
+                
                 <!-- HISTORY Button -->
                 <button class="nav-item flex flex-col items-center p-2 text-sm transition-colors duration-200 text-gray-400 hover:text-teal-300" data-view="history" onclick="switchView('history')">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M12 21a9 9 0 0 0 9-9h-2a7 7 0 0 1-7 7V12h-2V7h2V5H9a9 9 0 0 0-9 9z"/><polyline points="12 6 12 12 16 14"/></svg>
-                    <span class="mt-1 text-xs">History</span>
+                    <span class="mt-1">History</span>
                 </button>
             </div>
         </nav>
@@ -119,7 +119,9 @@
     </div>
 
     <!-- 
-      *** ALL JAVASCRIPT IS IN THIS SINGLE MODULE SCRIPT ***
+      *** THE FIX IS HERE ***
+      All JavaScript is now inside ONE single <script type="module"> block.
+      This guarantees Firebase is loaded and ready before any app logic runs.
     -->
     <script type="module">
         // --- Firebase SDK Imports ---
@@ -138,7 +140,7 @@
         // --- GLOBAL APP STATE ---
         let state = {
             currentView: 'home', // Default view is 'home'
-            userProfile: { // This is for Partner 1 (the main user)
+            userProfile: {
                 name: '',
                 dob: '',
                 tob: '',
@@ -163,10 +165,11 @@
 
             modalContainer.innerHTML = `
                 <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onclick="closeModal()">
-                    <div class="w-11/12 max-w-sm p-6 rounded-xl shadow-2xl ${color} border" onclick="event.stopPropagation()">
-                        <h3 class="text-xl font-bold mb-4 ${titleColor}">${title}</h3>
-                        <div class_name="text-sm text-gray-300" style="white-space: pre-wrap;">${content}</div>
-                        <button class="mt-6 w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200" onclick="closeModal()">Close</button>
+                    <!-- MODAL SCROLL FIX: Added max-h-screen, flex-col, and overflow-y-auto to content -->
+                    <div class="w-11/12 max-w-sm p-6 rounded-xl shadow-2xl ${color} border flex flex-col max-h-[90vh]" onclick="event.stopPropagation()">
+                        <h3 class="text-xl font-bold mb-4 ${titleColor} flex-shrink-0">${title}</h3>
+                        <div class="text-sm text-gray-300 overflow-y-auto mb-4 flex-grow">${content}</div>
+                        <button class="mt-auto w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition duration-200 flex-shrink-0" onclick="closeModal()">Close</button>
                     </div>
                 </div>
             `;
@@ -188,7 +191,7 @@
         window.handleFollowUp = handleFollowUp;
         window.handleChartSubmit = handleChartSubmit;
         window.handleHealthSubmit = handleHealthSubmit;
-        window.handleMatchingSubmit = handleMatchingSubmit; // <-- NEW
+        window.handleMatchingSubmit = handleMatchingSubmit; // Added for matching
 
 
         // --- FIREBASE / DATA MANAGEMENT ---
@@ -293,20 +296,10 @@
         
         // --- GEMINI API COMMUNICATION (SECURE PROXY) ---
 
-        async function generateReading(birthDetailsPartner1, userQuery, yearInput, readingType, previousReading = null, readingData, birthDetailsPartner2 = null) {
+        async function generateReading(payload, readingData) {
             showLoading(true);
             
             const apiUrl = '/.netlify/functions/generateReading'; 
-            
-            // Updated payload to support two partners
-            const payload = {
-                birthDetailsPartner1: birthDetailsPartner1,
-                birthDetailsPartner2: birthDetailsPartner2, // Will be null unless it's a matching request
-                userQuery,
-                yearInput,
-                readingType,
-                previousReading
-            };
 
             try {
                 let response = null;
@@ -321,48 +314,48 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if (response.ok) break; 
+                    if (response.ok) break; // Success, exit the loop
 
+                    // If not ok, handle errors
                     if (response.status === 429 && i < maxRetries - 1) { 
                         await new Promise(resolve => setTimeout(resolve, delay));
                         delay *= 2;
-                        continue; 
+                        continue; // Retry
                     }
                     
+                    // --- ROBUST ERROR HANDLING FIX ---
                     errorText = `Proxy request failed with status: ${response.status}`;
                     try {
-                        const rawError = await response.text(); 
+                        const rawError = await response.text(); // Read the body as text ONCE
                         try {
                             const errorResult = JSON.parse(rawError);
                             errorText = errorResult.error || rawError;
                         } catch (e) {
-                            errorText = rawError; 
+                            errorText = rawError; // Use the raw text if it's not JSON
                         }
                     } catch (e) {
                         console.error("Could not read error response body:", e);
                     }
+                    // We throw here to be caught by the final catch block
                     throw new Error(errorText); 
                 }
 
+                // This check is for if the loop finishes without success
                 if (!response.ok) {
                     throw new Error(errorText);
                 }
 
-                const result = await response.json(); 
+                // --- Success Path ---
+                const result = await response.json(); // This is now safe, body was not read
                 
                 if (result.error) {
                     throw new Error(result.error);
                 }
 
-                if (!previousReading) {
-                    // Update state with data from readingData
+                if (payload.readingType !== 'followup') {
                     state.currentReading = {
-                        title: readingData.title,
-                        birthDetails: birthDetailsPartner1, // Renamed for consistency in follow-up
-                        birthDetailsPartner2: birthDetailsPartner2, // Store partner 2
+                        ...readingData,
                         content: result.text,
-                        type: readingType,
-                        year: yearInput
                     };
                 }
                 
@@ -418,11 +411,11 @@
             const p = state.userProfile;
             return `
                 <form id="profile-form" class="space-y-3 p-4 border border-indigo-700/50 rounded-xl bg-gray-900/50">
-                    <h4 class="text-lg font-bold text-indigo-200">Your Default Birth Details</h4>
-                    <input type="text" id="profile-name" placeholder="Your Name" value="${p.name}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="date" id="profile-dob" placeholder="Your Date of Birth" value="${p.dob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="time" id="profile-tob" placeholder="Your Time of Birth" value="${p.tob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
-                    <input type="text" id="profile-city" placeholder="Your City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <h4 class="text-lg font-bold text-indigo-200">Default Birth Details</h4>
+                    <input type="text" id="profile-name" placeholder="Name" value="${p.name}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="date" id="profile-dob" placeholder="Date of Birth" value="${p.dob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="time" id="profile-tob" placeholder="Time of Birth" value="${p.tob}" class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
+                    <input type="text" id="profile-city" placeholder="City/Location" value="${p.city}" required class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-gray-400">
                     <button type="submit" class="w-full py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition duration-200" onclick="event.preventDefault(); handleSaveProfile()">Save Default Details</button>
                 </form>
             `;
@@ -482,19 +475,19 @@
                 const itemView = item.dataset.view;
                 if (itemView === view) {
                     item.classList.add('font-bold');
-                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-teal-300', 'hover:text-red-300');
+                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-amber-300', 'hover:text-teal-300');
                     if(view === 'home') item.classList.add('text-indigo-400');
                     if(view === 'chart') item.classList.add('text-indigo-400');
                     if(view === 'health') item.classList.add('text-pink-400');
-                    if(view === 'matching') item.classList.add('text-red-400'); // New Color
+                    if(view === 'matching') item.classList.add('text-amber-400');
                     if(view === 'history') item.classList.add('text-teal-400');
                 } else {
-                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-teal-400', 'text-red-400', 'font-bold');
+                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-amber-400', 'text-teal-400', 'font-bold');
                     item.classList.add('text-gray-400');
                     if(itemView === 'home') item.classList.add('hover:text-indigo-300');
                     if(itemView === 'chart') item.classList.add('hover:text-indigo-300');
                     if(itemView === 'health') item.classList.add('hover:text-pink-300');
-                    if(itemView === 'matching') item.classList.add('hover:text-red-300'); // New Color
+                    if(itemView === 'matching') item.classList.add('hover:text-amber-300');
                     if(itemView === 'history') item.classList.add('hover:text-teal-300');
                 }
             });
@@ -516,7 +509,7 @@
                 case 'health':
                     renderHealthForm();
                     break;
-                case 'matching': // <-- NEW CASE
+                case 'matching':
                     renderMatchingForm();
                     break;
                 case 'history':
@@ -530,7 +523,6 @@
                 <div class="text-center p-6 space-y-8">
                     <h2 class="text-4xl font-extrabold text-indigo-300">Welcome to Cosmic Compass</h2>
                     <div class="cosmic-hero mx-auto w-56 h-56 relative">
-                        <!-- ... SVG Hero Image ... -->
                         <svg viewBox="0 0 100 100" class="w-full h-full">
                             <circle cx="50" cy="50" r="45" fill="none" stroke="#3730A3" stroke-width="1"/>
                             <circle cx="50" cy="50" r="35" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="1 3"/>
@@ -556,7 +548,7 @@
                             <ul class="text-gray-300 space-y-2">
                                 <li class="flex items-center"><span class="text-indigo-400 mr-3">Chart:</span> Comprehensive natal chart, annual forecasts, and specific life queries.</li>
                                 <li class="flex items-center"><span class="text-pink-400 mr-3">Health:</span> Astrological insights into your vitality, strengths, and holistic well-being.</li>
-                                <li class="flex items-center"><span class="text-red-400 mr-3">Matching:</span> Check your compatibility (Kundali Match) with a partner.</li>
+                                <li class="flex items-center"><span class="text-amber-400 mr-3">Matching:</span> Detailed Kundali matching (Ashtakoot Milan) for compatibility.</li>
                                 <li class="flex items-center"><span class="text-teal-400 mr-3">History:</span> Save and review your personalized readings (automatically saved to your private cloud history).</li>
                             </ul>
                         </div>
@@ -564,15 +556,13 @@
                 </div>
             `;
         }
-        
         function getFormFields(formType, partnerSuffix = '') {
-            // Use Partner 1's saved profile data ONLY for the 'chart', 'health', and 'p1' forms.
-            const p = (formType === 'chart' || formType === 'health' || partnerSuffix === 'p1') ? state.userProfile : { name: '', dob: '', tob: '', city: '' };
+            // Use partner1's profile data ONLY for the partner1 form
+            const p = (formType === 'matching' && partnerSuffix === '1') ? state.userProfile : { name: '', dob: '', tob: '', city: '' };
             
-            const isChartForm = formType === 'chart';
-            const isHealthForm = formType === 'health';
-            const isMatchingForm = formType === 'matching';
-
+            // Don't show these fields for partner 2
+            const showAdvancedFields = (formType === 'chart' && partnerSuffix === '') || (formType === 'health' && partnerSuffix === '');
+            
             return `
                 <div class="space-y-3">
                     <input type="text" id="${formType}-name${partnerSuffix}" placeholder="Name (e.g., Jane Doe)" value="${p.name}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
@@ -580,20 +570,15 @@
                     <input type="time" id="${formType}-tob${partnerSuffix}" placeholder="Time of Birth" value="${p.tob}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     <input type="text" id="${formType}-city${partnerSuffix}" placeholder="City (e.g., New York, NY)" value="${p.city}" required class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
                     
-                    ${isChartForm ? `
-                        <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
-                    ` : ''}
-
-                    ${(isChartForm || isHealthForm) ? `
-                        <textarea id="${formType}-query" rows="3" placeholder="${isChartForm ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
+                    ${showAdvancedFields ? `
+                        ${formType === 'chart' ? `
+                            <input type="number" id="chart-year" placeholder="Annual Forecast Year (Optional)" min="${new Date().getFullYear()}" max="${new Date().getFullYear() + 10}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400">
+                        ` : ''}
+                        <textarea id="${formType}-query" rows="3" placeholder="${formType === 'chart' ? 'Specific Question (e.g., How will my career look next month?) - OPTIONAL' : 'Specific Health Inquiry (e.g., Focus on my joints and energy levels) - OPTIONAL'}" class="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
                     ` : ''}
                 </div>
-                ${!isMatchingForm ? `
-                    <button type="submit" class="w-full p-3 mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
-                ` : ''}
             `;
         }
-
         function renderChartForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
@@ -601,6 +586,7 @@
                 <form id="chart-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl">
                     <p class="text-sm text-gray-400 mb-4">Enter your birth details to receive a comprehensive analysis, annual forecast, or a specific query response.</p>
                     ${getFormFields('chart')}
+                    <button type="submit" class="w-full p-3 mt-5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Reading</button>
                 </form>
                 <div id="reading-output" class="mt-8"></div>
             `;
@@ -614,34 +600,33 @@
                 <form id="health-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl">
                     <p class="text-sm text-gray-400 mb-4">Get an astrological perspective on your vitality, strengths, and areas for preventative care.</p>
                     ${getFormFields('health')}
+                    <button type="submit" class="w-full p-3 mt-5 bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Profile</button>
                 </form>
                 <div id="reading-output" class="mt-8"></div>
             `;
             document.getElementById('health-form').addEventListener('submit', handleHealthSubmit);
             state.currentReading = null;
         }
-
-        // --- NEW: RENDER MATCHING FORM ---
         function renderMatchingForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-red-300 mb-6 border-b border-red-700/50 pb-2">Kundali Matching</h2>
+                <h2 class="text-3xl font-bold text-amber-300 mb-6 border-b border-amber-700/50 pb-2">Kundali Matching</h2>
                 <form id="matching-form" class="space-y-6">
-                    <!-- Partner 1 Form -->
-                    <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-indigo-500/30">
-                        <h3 class="text-xl font-bold text-indigo-300 mb-4">Partner 1 (Your Details)</h3>
-                        <p class="text-sm text-gray-400 mb-4">Your saved profile details are loaded here.</p>
-                        ${getFormFields('matching', 'p1')}
+                    <!-- Partner 1 -->
+                    <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-indigo-500/50">
+                         <h3 class="text-xl font-bold text-indigo-300 mb-3">Partner 1 (Your Details)</h3>
+                         <p class="text-sm text-gray-400 mb-4">Your saved profile details are loaded here.</p>
+                        ${getFormFields('matching', '1')}
                     </div>
                     
-                    <!-- Partner 2 Form -->
-                    <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-pink-500/30">
-                        <h3 class="text-xl font-bold text-pink-300 mb-4">Partner 2 Details</h3>
-                        <p class="text-sm text-gray-400 mb-4">Enter the second person's birth details.</p>
-                        ${getFormFields('matching', 'p2')}
+                    <!-- Partner 2 -->
+                    <div class="bg-gray-800 p-5 rounded-2xl shadow-xl border border-gray-700">
+                         <h3 class="text-xl font-bold text-gray-300 mb-3">Partner 2 Details</h3>
+                         <p class="text-sm text-gray-400 mb-4">Enter the second person's birth details.</p>
+                        ${getFormFields('matching', '2')}
                     </div>
                     
-                    <button type="submit" class="w-full p-3 mt-5 bg-red-600 hover:bg-red-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Compatibility Report</button>
+                    <button type="submit" class="w-full p-3 mt-5 bg-amber-600 hover:bg-amber-700 text-white font-bold text-lg rounded-xl shadow-lg transition duration-200">Generate Compatibility Report</button>
                 </form>
                 <div id="reading-output" class="mt-8"></div>
             `;
@@ -663,55 +648,29 @@
                 const isExpanded = reading.id === historyList.dataset.expandedId;
                 const snippet = reading.content ? reading.content.substring(0, 150) + (reading.content.length > 150 ? '...' : '') : 'No content available.';
                 
-                // --- NEW: History Title Logic ---
                 let title = 'Reading';
+                let subtitle = reading.type ? reading.type.toUpperCase() : 'N/A';
+                
                 if (reading.type === 'matching') {
-                    title = `Compatibility: ${reading.birthDetailsPartner1.name || 'P1'} & ${reading.birthDetailsPartner2.name || 'P2'}`;
-                } else if (reading.year) {
-                    title = `Annual Forecast (${reading.year})`;
+                    title = 'Kundali Match Report';
+                    subtitle = `${reading.birthDetailsPartner1.name || 'P1'} & ${reading.birthDetailsPartner2.name || 'P2'}`;
                 } else if (reading.type === 'health') {
                     title = 'Health Profile';
-                } else {
-                    title = reading.title || 'Natal Chart Overview';
+                    subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : `For ${reading.birthDetailsPartner1.name || 'User'}`;
+                } else if (reading.type === 'chart') {
+                    if (reading.year) {
+                        title = `Annual Forecast (${reading.year})`;
+                    } else if (reading.userQuery) {
+                        title = 'Targeted Chart Query';
+                    } else {
+                        title = 'Natal Chart Overview';
+                    }
+                    subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : `For ${reading.birthDetailsPartner1.name || 'User'}`;
                 }
-                
-                const subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : (reading.type ? reading.type.toUpperCase() : 'CHART');
-                const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
 
+                const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
                 const item = document.createElement('div');
                 item.className = `bg-gray-800 rounded-xl shadow-lg border border-indigo-700/50 overflow-hidden cursor-pointer transition duration-300 hover:shadow-indigo-500/30`;
-                
-                // --- NEW: History Detail Rendering ---
-                let detailsHTML = '';
-                if (reading.type === 'matching' && reading.birthDetailsPartner1 && reading.birthDetailsPartner2) {
-                    detailsHTML = `
-                        <p class="font-semibold text-indigo-400">Partner 1 Details:</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                            <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
-                            <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
-                            <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
-                            <div>City: ${reading.birthDetailsPartner1.city}</div>
-                        </div>
-                        <p class="font-semibold text-pink-400 mt-2">Partner 2 Details:</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                            <div>Name: ${reading.birthDetailsPartner2.name || 'N/A'}</div>
-                            <div>DOB: ${reading.birthDetailsPartner2.dob}</div>
-                            <div>TOB: ${reading.birthDetailsPartner2.tob}</div>
-                            <div>City: ${reading.birthDetailsPartner2.city}</div>
-                        </div>
-                    `;
-                } else if (reading.birthDetails) {
-                     detailsHTML = `
-                        <p class="font-semibold text-indigo-400">Birth Details:</p>
-                        <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
-                            <div>Name: ${reading.birthDetails.name || 'N/A'}</div>
-                            <div>DOB: ${reading.birthDetails.dob}</div>
-                            <div>TOB: ${reading.birthDetails.tob}</div>
-                            <div>City: ${reading.birthDetails.city}</div>
-                        </div>
-                    `;
-                }
-
                 item.innerHTML = `
                     <div class="p-4 flex justify-between items-center" onclick="toggleHistoryExpansion('${reading.id}')">
                         <div>
@@ -723,9 +682,35 @@
                     </div>
                     ${isExpanded ? `
                         <div class="p-4 pt-0 text-sm text-gray-300 bg-gray-900 border-t border-indigo-700/50 space-y-4">
-                            ${detailsHTML}
+                            
+                            ${reading.type === 'matching' ? `
+                                <p class="font-semibold text-indigo-400">Partner 1 Details:</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                                    <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
+                                    <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
+                                    <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
+                                    <div>City: ${reading.birthDetailsPartner1.city}</div>
+                                </div>
+                                <p class="font-semibold text-indigo-400 mt-2">Partner 2 Details:</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                                    <div>Name: ${reading.birthDetailsPartner2.name || 'N/A'}</div>
+                                    <div>DOB: ${reading.birthDetailsPartner2.dob}</div>
+                                    <div>TOB: ${reading.birthDetailsPartner2.tob}</div>
+                                    <div>City: ${reading.birthDetailsPartner2.city}</div>
+                                </div>
+                            ` : `
+                                <p class="font-semibold text-indigo-400">Birth Details:</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs text-gray-400">
+                                    <div>Name: ${reading.birthDetailsPartner1.name || 'N/A'}</div>
+                                    <div>DOB: ${reading.birthDetailsPartner1.dob}</div>
+                                    <div>TOB: ${reading.birthDetailsPartner1.tob}</div>
+                                    <div>City: ${reading.birthDetailsPartner1.city}</div>
+                                </div>
+                            `}
+
                             <p class="font-semibold text-indigo-400 mt-4">Reading:</p>
                             <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.content || 'No content.'}</div>
+                            
                             ${reading.followUpContent ? `
                                 <p class="font-semibold text-indigo-400 mt-4 border-t border-indigo-700/50 pt-4">Follow-up: ${reading.followUpQuestion}</p>
                                 <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.followUpContent}</div>
@@ -750,28 +735,16 @@
             }
             renderHistory();
         }
-        function renderReadingOutput(readingText) {
+        function renderReadingOutput(readingText, readingData) {
             const outputDiv = document.getElementById('reading-output');
             if (!outputDiv) return;
-            
-            // Determine border color based on type
-            let borderColor = 'border-indigo-700/50';
-            let titleColor = 'text-indigo-400';
-            if (state.currentReading.type === 'health') {
-                borderColor = 'border-pink-700/50';
-                titleColor = 'text-pink-400';
-            } else if (state.currentReading.type === 'matching') {
-                borderColor = 'border-red-700/50';
-                titleColor = 'text-red-400';
-            }
-
             outputDiv.innerHTML = `
-                <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl border ${borderColor} space-y-4">
-                    <h3 class="text-2xl font-bold ${titleColor} border-b ${borderColor} pb-2">${state.currentReading.title}</h3>
+                <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl border border-indigo-700/50 space-y-4">
+                    <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${readingData.title}</h3>
                     <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${readingText}</div>
                     
-                    <!-- Follow-up Section (Disabled for Matching reports for simplicity) -->
-                    ${state.currentReading.type !== 'matching' ? `
+                    <!-- Follow-up Section (Not available for matching) -->
+                    ${readingData.type !== 'matching' ? `
                     <div class="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
                         <h4 class="font-semibold text-indigo-300 mb-3">Ask a Follow-up Question</h4>
                         <textarea id="follow-up-query" rows="2" placeholder="Ask a specific question based on the reading above..." class="w-full p-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400"></textarea>
@@ -811,20 +784,21 @@
                 showModal('Error', 'Original reading context is missing.', 'error');
                 return;
             }
-            const readingData = { ...currentReading }; 
-            const answer = await generateReading(
-                currentReading.birthDetails, // Partner 1
-                followUpQuery,
-                currentReading.year,
-                currentReading.type, 
-                currentReading.content, // Pass the previous reading as context
-                readingData,
-                currentReading.birthDetailsPartner2 // Pass Partner 2 (will be null if not matching)
-            );
+            
+            const payload = {
+                birthDetailsPartner1: currentReading.birthDetailsPartner1,
+                userQuery: followUpQuery,
+                yearInput: currentReading.year,
+                readingType: currentReading.type, 
+                previousReading: currentReading.content // Pass the previous reading as context
+            };
+            
+            const answer = await generateReading(payload, null); // readingData is null for follow-up
+            
             if (answer) {
                 renderFollowUpOutput(followUpQuery, answer);
                 const combinedReading = {
-                    ...readingData,
+                    ...currentReading,
                     content: currentReading.content, 
                     followUpQuestion: followUpQuery,
                     followUpContent: answer,
@@ -835,115 +809,107 @@
                 state.currentReading.followUpContent = answer;
             }
         }
-        
-        function getReadingData(formType, p1_suffix = '', p2_suffix = '') {
-            const name = document.getElementById(`${formType}-name${p1_suffix}`)?.value.trim();
-            const dob = document.getElementById(`${formType}-dob${p1_suffix}`)?.value;
-            const tob = document.getElementById(`${formType}-tob${p1_suffix}`)?.value;
-            const city = document.getElementById(`${formType}-city${p1_suffix}`)?.value.trim();
-            
-            if (!dob || !tob || !city) {
-                showModal('Input Required', `Date of Birth, Time of Birth, and City are required ${p2_suffix ? 'for both partners' : ''}.`, 'error');
-                return null;
-            }
 
-            const birthDetails = { name, dob, tob, city };
-            
-            if (formType === 'matching') {
-                // This is a matching request, get Partner 2 data
-                const name_p2 = document.getElementById(`${formType}-name${p2_suffix}`).value.trim();
-                const dob_p2 = document.getElementById(`${formType}-dob${p2_suffix}`).value;
-                const tob_p2 = document.getElementById(`${formType}-tob${p2_suffix}`).value;
-                const city_p2 = document.getElementById(`${formType}-city${p2_suffix}`).value.trim();
+        function getReadingData(formType) {
+            let birthDetailsPartner1 = {};
+            let birthDetailsPartner2 = {};
+            let query = '', year = '', title = '';
 
-                if (!dob_p2 || !tob_p2 || !city_p2) {
-                    showModal('Input Required', 'Date of Birth, Time of Birth, and City are required for Partner 2.', 'error');
+            if (formType === 'chart' || formType === 'health') {
+                birthDetailsPartner1.name = document.getElementById(`${formType}-name`).value.trim();
+                birthDetailsPartner1.dob = document.getElementById(`${formType}-dob`).value;
+                birthDetailsPartner1.tob = document.getElementById(`${formType}-tob`).value;
+                birthDetailsPartner1.city = document.getElementById(`${formType}-city`).value.trim();
+                query = document.getElementById(`${formType}-query`).value.trim();
+                if (formType === 'chart') {
+                    year = document.getElementById('chart-year').value.trim();
+                }
+
+                if (!birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city) {
+                    showModal('Input Required', 'Date of Birth, Time of Birth, and City are required.', 'error');
                     return null;
                 }
                 
-                const birthDetails_p2 = { name: name_p2, dob: dob_p2, tob: tob_p2, city: city_p2 };
-                return { 
-                    birthDetailsPartner1: birthDetails, 
-                    birthDetailsPartner2: birthDetails_p2, 
-                    type: 'matching', 
-                    title: `Compatibility Report for ${name || 'Partner 1'} & ${name_p2 || 'Partner 2'}` 
-                };
-            }
+                if (formType === 'health') {
+                    title = 'Holistic Health Profile';
+                } else if (year) {
+                    title = `Annual Forecast for ${year}`;
+                } else if (query) {
+                    title = `Targeted Chart Query`;
+                } else {
+                    title = 'Comprehensive Natal Chart Overview';
+                }
+            } else if (formType === 'matching') {
+                birthDetailsPartner1.name = document.getElementById(`matching-name1`).value.trim();
+                birthDetailsPartner1.dob = document.getElementById(`matching-dob1`).value;
+                birthDetailsPartner1.tob = document.getElementById(`matching-tob1`).value;
+                birthDetailsPartner1.city = document.getElementById(`matching-city1`).value.trim();
+                
+                birthDetailsPartner2.name = document.getElementById(`matching-name2`).value.trim();
+                birthDetailsPartner2.dob = document.getElementById(`matching-dob2`).value;
+                birthDetailsPartner2.tob = document.getElementById(`matching-tob2`).value;
+                birthDetailsPartner2.city = document.getElementById(`matching-city2`).value.trim();
 
-            // Standard Chart or Health request
-            const query = document.getElementById(`${formType}-query`)?.value.trim();
-            const year = formType === 'chart' ? document.getElementById('chart-year')?.value.trim() : null;
-
-            let title = '';
-            if (formType === 'health') {
-                title = 'Holistic Health Profile';
-            } else if (year) {
-                title = `Annual Forecast for ${year}`;
-            } else if (query) {
-                title = `Targeted Chart Query`;
-            } else {
-                title = 'Comprehensive Natal Chart Overview';
+                if (!birthDetailsPartner1.dob || !birthDetailsPartner1.tob || !birthDetailsPartner1.city || !birthDetailsPartner2.dob || !birthDetailsPartner2.tob || !birthDetailsPartner2.city) {
+                    showModal('Input Required', 'All birth details for both partners are required.', 'error');
+                    return null;
+                }
+                title = `Kundali Match: ${birthDetailsPartner1.name || 'P1'} & ${birthDetailsPartner2.name || 'P2'}`;
             }
             
-            return { birthDetailsPartner1: birthDetails, query, year, type: formType, title };
+            return { birthDetailsPartner1, birthDetailsPartner2, query, year, type: formType, title };
         }
 
         async function handleChartSubmit(e) {
             e.preventDefault();
             const readingData = getReadingData('chart');
             if (!readingData) return;
-
-            const { birthDetailsPartner1, query, year, type, title } = readingData;
             
-            const generatedText = await generateReading(birthDetailsPartner1, query, year, type, null, readingData);
+            const payload = {
+                birthDetailsPartner1: readingData.birthDetailsPartner1,
+                userQuery: readingData.query,
+                yearInput: readingData.year,
+                readingType: 'chart'
+            };
 
+            const generatedText = await generateReading(payload, readingData);
             if (generatedText) {
-                renderReadingOutput(generatedText);
-                await saveReading({ ...state.currentReading, userQuery: query || null });
+                renderReadingOutput(generatedText, state.currentReading);
+                await saveReading({ ...state.currentReading, userQuery: readingData.query || null });
             }
         }
         async function handleHealthSubmit(e) {
             e.preventDefault();
             const readingData = getReadingData('health');
             if (!readingData) return;
+            
+            const payload = {
+                birthDetailsPartner1: readingData.birthDetailsPartner1,
+                userQuery: readingData.query,
+                readingType: 'health'
+            };
 
-            const { birthDetailsPartner1, query, type, title } = readingData;
-
-            const generatedText = await generateReading(birthDetailsPartner1, query, null, type, null, readingData);
-
+            const generatedText = await generateReading(payload, readingData);
             if (generatedText) {
-                renderReadingOutput(generatedText);
-                await saveReading({ ...state.currentReading, userQuery: query || null });
+                renderReadingOutput(generatedText, state.currentReading);
+                await saveReading({ ...state.currentReading, userQuery: readingData.query || null });
             }
         }
-        
-        // --- NEW: HANDLE MATCHING SUBMIT ---
         async function handleMatchingSubmit(e) {
             e.preventDefault();
-            const readingData = getReadingData('matching', 'p1', 'p2');
+            const readingData = getReadingData('matching');
             if (!readingData) return;
-
-            const { birthDetailsPartner1, birthDetailsPartner2, type, title } = readingData;
             
-            const generatedText = await generateReading(
-                birthDetailsPartner1, 
-                null, // userQuery
-                null, // yearInput
-                type, 
-                null, // previousReading
-                readingData,
-                birthDetailsPartner2
-            );
-
+            const payload = {
+                birthDetailsPartner1: readingData.birthDetailsPartner1,
+                birthDetailsPartner2: readingData.birthDetailsPartner2,
+                readingType: 'matching'
+            };
+            
+            const generatedText = await generateReading(payload, readingData);
             if (generatedText) {
-                renderReadingOutput(generatedText);
-                // Save the complete matching data to history
-                await saveReading({ 
-                    ...state.currentReading,
-                    birthDetailsPartner1: birthDetailsPartner1, // Save P1 data
-                    birthDetailsPartner2: birthDetailsPartner2, // Save P2 data
-                    userQuery: null 
-                });
+                renderReadingOutput(generatedText, state.currentReading);
+                await saveReading({ ...state.currentReading });
             }
         }
         
@@ -1004,7 +970,7 @@
 
                 // *** THIS IS THE LOGIC FIX ***
                 // ONLY render the initial view AFTER auth is confirmed.
-                switchView(state.currentView || 'home'); 
+                switchView('home'); 
             });
 
             // Handle the case where there is no pre-existing auth token
