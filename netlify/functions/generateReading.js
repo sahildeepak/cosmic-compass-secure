@@ -48,6 +48,9 @@ exports.handler = async (event, context) => {
         // 3. Build the System Instruction (The Core Logic - Hidden from Client)
         let systemPrompt = '';
         let userPrompt = '';
+        
+        // *** MARKDOWN BUG FIX ***
+        const formattingRule = "Do not use Markdown, headers, lists, or asterisks for bolding. Respond in plain, natural language paragraphs, separated by a single newline.";
 
         const chartString = 
             `\n--- CHART DATA ---\n` +
@@ -59,19 +62,19 @@ exports.handler = async (event, context) => {
 
         if (readingType === 'health') {
             // Health System Prompt
-            systemPrompt = `You are a professional medical astrologer. Analyze the provided birth chart data. Focus your response on the native's innate vitality, potential physical strengths and imbalances (especially those related to the 6th house, Sun, and Moon placements), and suggest holistic well-being practices. Be encouraging and focus on preventative care.`;
+            systemPrompt = `You are a professional medical astrologer. Analyze the provided birth chart data. Focus your response on the native's innate vitality, potential physical strengths and imbalances (especially those related to the 6th house, Sun, and Moon placements), and suggest holistic well-being practices. Be encouraging and focus on preventative care. ${formattingRule}`;
             userPrompt = `Generate a comprehensive health profile based on this data. Specific health inquiry: ${userQuery || 'N/A'}.`;
         } else if (previousReading && userQuery) {
             // Follow-up System Prompt
-            systemPrompt = 'You are a highly contextual astrology consultant. The user has provided their original chart data, the full previous reading, and a new follow-up question. Use the full context to provide a focused and detailed answer to their follow-up question. Do not repeat the previous reading content.';
+            systemPrompt = `You are a highly contextual astrology consultant. The user has provided their original chart data, the full previous reading, and a new follow-up question. Use the full context to provide a focused and detailed answer to their follow-up question. Do not repeat the previous reading content. ${formattingRule}`;
             userPrompt = `Based on the following previous reading: "${previousReading}", and the user's natal chart, answer this follow-up question: "${userQuery}".`;
         } else if (yearInput) {
             // Annual Forecast System Prompt
-            systemPrompt = `You are an expert annual forecaster specializing in Solar Return charts and major transits. Analyze the natal chart for the year ${yearInput}. Focus on major themes, areas of opportunity (Jupiter/Venus transits), and areas requiring caution (Saturn/Mars transits) for the native during that period.`;
+            systemPrompt = `You are an expert annual forecaster specializing in Solar Return charts and major transits. Analyze the natal chart for the year ${yearInput}. Focus on major themes, areas of opportunity (Jupiter/Venus transits), and areas requiring caution (Saturn/Mars transits) for the native during that period. ${formattingRule}`;
             userPrompt = `Generate the annual forecast for the year ${yearInput} based on the chart data.`;
         } else {
             // Natal Chart Overview System Prompt (Default)
-            systemPrompt = `You are a world-class, insightful astrologer. Generate a comprehensive Natal Chart Overview, covering the native's sun, moon, and rising sign, along with key planetary aspects that define their personality, career approach, and emotional nature. Keep the tone warm and empowering.`;
+            systemPrompt = `You are a world-class, insightful astrologer. Generate a comprehensive Natal Chart Overview, covering the native's sun, moon, and rising sign, along with key planetary aspects that define their personality, career approach, and emotional nature. Keep the tone warm and empowering. ${formattingRule}`;
             userPrompt = `Generate the full natal chart reading. Specific focus if any: ${userQuery || 'N/A'}.`;
         }
 
@@ -126,7 +129,7 @@ exports.handler = async (event, context) => {
             }),
         };
 
-    } catch (error) { // <--- THIS IS THE FIX
+    } catch (error) { 
         console.error("Proxy error:", error);
         return {
             statusCode: 500,
