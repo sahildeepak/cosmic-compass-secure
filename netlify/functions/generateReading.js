@@ -35,11 +35,20 @@ exports.handler = async (event, context) => {
     }
 
     try {
-        // --- UPDATED: Now receives Partner 1 and (optionally) Partner 2 ---
-        const { birthDetailsPartner1, birthDetailsPartner2, userQuery, yearInput, readingType, previousReading, zodiacSign, numerologyDetails } = clientData;
+        // --- UPDATED: Destructure new palmistry fields ---
+        const { 
+            birthDetailsPartner1, 
+            birthDetailsPartner2, 
+            userQuery, 
+            yearInput, 
+            readingType, 
+            previousReading, 
+            zodiacSign, 
+            numerologyDetails,
+            mimeType, // For palmistry
+            imageData   // For palmistry
+        } = clientData;
 
-        // *** ROBUSTNESS FIX: Validate required data ***
-        // Basic validation (can be expanded)
         if (!readingType) {
              return {
                 statusCode: 400,
@@ -50,8 +59,8 @@ exports.handler = async (event, context) => {
         // 3. Build the System Instruction (The Core Logic - Hidden from Client)
         let systemPrompt = '';
         let userPrompt = '';
+        let payload; // This will hold the final payload for Gemini
         
-        // *** MARKDOWN BUG FIX ***
         const formattingRule = "Do not use Markdown, headers, lists, or asterisks for bolding. Respond in plain, natural language paragraphs, separated by a single newline.";
 
         let chartStringP1 = '';
@@ -67,15 +76,14 @@ exports.handler = async (event, context) => {
             
         let chartStringP2 = '';
             
-        // --- NEW: Logic for Matching ---
         if (readingType === 'matching') {
+            // ... (existing matching logic) ...
             if (!birthDetailsPartner2 || !birthDetailsPartner2.dob || !birthDetailsPartner2.tob || !birthDetailsPartner2.city) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({ error: 'Invalid request: Missing required birth details for Partner 2 for matching.' })
                 };
             }
-            
             chartStringP2 = 
                 `\n--- CHART DATA (PARTNER 2) ---\n` +
                 `Name: ${birthDetailsPartner2.name || 'N/A'}\n` +
@@ -83,33 +91,32 @@ exports.handler = async (event, context) => {
                 `TOB: ${birthDetailsPartner2.tob}\n` +
                 `City: ${birthDetailsPartner2.city}\n` +
                 `--- END CHART DATA (PARTNER 2) ---`;
-
             systemPrompt = `You are an expert Vedic astrologer specializing in Kundali Matching (Ashtakoot Milan). Analyze the birth charts of both individuals. Provide a compatibility score (Guna Milan) out of 36. Then, provide a detailed paragraph for each of the 8 Kootas (Varna, Vasya, Tara, Yoni, Graha Maitri, Gana, Bhakoot, Nadi). Finally, give a concluding summary of the match, highlighting strengths, weaknesses, and a final verdict (e.g., Excellent, Good, Average, Challenging). ${formattingRule}`;
             userPrompt = `Generate a full Kundali matching report for Partner 1 and Partner 2 based on their chart data.`;
         
         } else if (readingType === 'health') {
-            // Health System Prompt
+            // ... (existing health logic) ...
             systemPrompt = `You are a professional medical astrologer. Analyze the provided birth chart data. Focus your response on the native's innate vitality, potential physical strengths and imbalances (especially those related to the 6th house, Sun, and Moon placements), and suggest holistic well-being practices. Be encouraging and focus on preventative care. ${formattingRule}`;
             userPrompt = `Generate a comprehensive health profile based on this data. Specific health inquiry: ${userQuery || 'N/A'}.`;
         
         } else if (previousReading && userQuery) {
-            // Follow-up System Prompt
+            // ... (existing followup logic) ...
             systemPrompt = `You are a highly contextual astrology consultant. The user has provided their original chart data, the full previous reading, and a new follow-up question. Use the full context to provide a focused and detailed answer to their follow-up question. Do not repeat the previous reading content. ${formattingRule}`;
             userPrompt = `Based on the following previous reading: "${previousReading}", and the user's natal chart, answer this follow-up question: "${userQuery}".`;
         
         } else if (yearInput) {
-            // Annual Forecast System Prompt
+            // ... (existing forecast logic) ...
             systemPrompt = `You are an expert annual forecaster specializing in Solar Return charts and major transits. Analyze the natal chart for the year ${yearInput}. Focus on major themes, areas of opportunity (Jupiter/Venus transits), and areas requiring caution (Saturn/Mars transits) for the native during that period. ${formattingRule}`;
             userPrompt = `Generate the annual forecast for the year ${yearInput} based on the chart data.`;
         
-        // --- NEW: Daily Horoscope Logic ---
         } else if (readingType === 'daily_horoscope') {
+            // ... (existing horoscope logic) ...
             systemPrompt = `You are a concise and insightful astrologer. Provide a 3-paragraph daily horoscope for the given Sun Sign for today. Focus on love, career, and health. ${formattingRule}`;
             userPrompt = `Generate today's daily horoscope for ${zodiacSign}.`;
-            chartStringP1 = ''; // No chart data needed
-
-        // --- NEW: Numerology Logic ---
+            chartStringP1 = ''; 
+        
         } else if (readingType === 'numerology') {
+            // ... (existing numerology logic) ...
             if (!numerologyDetails || !numerologyDetails.name || !numerologyDetails.dob) {
                  return {
                     statusCode: 400,
@@ -124,24 +131,61 @@ Provide a final summary paragraph. ${formattingRule}`;
             userPrompt = `Generate a full numerology report for:
 Full Name: ${numerologyDetails.name}
 Date of Birth: ${numerologyDetails.dob}`;
+            chartStringP1 = ''; 
+
+        // --- NEW: Palmistry Logic ---
+        } else if (readingType === 'palmistry') {
+            if (!imageData || !mimeType) {
+                 return {
+                    statusCode: 400,
+                    body: JSON.stringify({ error: 'Invalid request: Missing required image data for palmistry.' })
+                };
+            }
+            systemPrompt = `You are an expert palm reader (Chiromancer). Analyze the user's palm image. Focus on the three major lines:
+1.  **Heart Line:** Analyze its shape, length, and placement for emotional nature and relationships.
+2.  **Head Line:** Analyze its shape, length, and fork for mentality, intellect, and communication style.
+3.  **Life Line:** Analyze its arc and depth for vitality, health, and major life path themes.
+Provide a final summary of the user's personality and potential based on these lines. ${formattingRule}`;
+            userPrompt = "Please analyze my palm, focusing on the Heart Line, Head Line, and Life Line.";
             chartStringP1 = ''; // No chart data needed
 
         } else {
-            // Natal Chart Overview System Prompt (Default)
+            // ... (existing default chart logic) ...
             systemPrompt = `You are a world-class, insightful astrologer. Generate a comprehensive Natal Chart Overview, covering the native's sun, moon, and rising sign, along with key planetary aspects that define their personality, career approach, and emotional nature. Keep the tone warm and empowering. ${formattingRule}`;
             userPrompt = `Generate the full natal chart reading. Specific focus if any: ${userQuery || 'N/A'}.`;
         }
 
-        // --- UPDATED: Combine prompts ---
-        userPrompt = userPrompt + chartStringP1 + chartStringP2; // chartStringP2 will be empty unless matching
+        // --- Combine prompts (unless it's a type that doesn't use chart strings) ---
+        if (readingType !== 'daily_horoscope' && readingType !== 'numerology' && readingType !== 'palmistry') {
+            userPrompt = userPrompt + chartStringP1 + chartStringP2;
+        }
 
         // 4. Construct the API Payload
-        const payload = {
-            contents: [{ parts: [{ text: userPrompt }] }],
-            // We still use Google Search grounding for accurate, up-to-date astrological interpretations
-            tools: [{ "google_search": {} }],
-            systemInstruction: { parts: [{ text: systemPrompt }] },
-        };
+        if (readingType === 'palmistry') {
+            // --- NEW: Multimodal Payload for Palmistry ---
+            payload = {
+                contents: [{ 
+                    parts: [
+                        { "text": userPrompt },
+                        { 
+                            "inlineData": {
+                                "mimeType": mimeType,
+                                "data": imageData
+                            }
+                        }
+                    ]
+                }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                // No grounding needed for palm reading
+            };
+        } else {
+            // --- Standard Text-Based Payload ---
+            payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+            };
+        }
 
         // 5. Securely Call the Gemini API
         const response = await fetch(`${API_URL}?key=${GEMINI_API_KEY}`, {
