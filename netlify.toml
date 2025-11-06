@@ -1,8 +1,6 @@
 # This file tells Netlify to increase the timeout for your function
-[functions]
-  # Set the timeout to 26 seconds (the max for Pro plan sync functions)
-  timeout = 26
 
 # Specific configuration for your generateReading function
+# This is the only block needed to set the 26-second timeout.
 [functions."generateReading"]
   timeout = 26
