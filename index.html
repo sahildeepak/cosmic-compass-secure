@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,7 +53,20 @@
         </header>
 
         <!-- MAIN CONTENT AREA -->
-        <main id="content-area" class="flex-grow p-4"></main>
+        <main id="content-area" class="flex-grow p-4">
+             <!-- THIS IS THE NEW DEFAULT SPLASH SCREEN. IT WILL BE REPLACED ONCE FIREBASE IS READY. -->
+             <div id="initial-splash" class="text-center p-6 space-y-8 mt-10">
+                <div class="cosmic-hero mx-auto w-56 h-56 relative animate-pulse">
+                    <svg viewBox="0 0 100 100" class="w-full h-full">
+                        <circle cx="50" cy="50" r="45" fill="none" stroke="#3730A3" stroke-width="1"/>
+                        <circle cx="50" cy="50" r="35" fill="none" stroke="#4F46E5" stroke-width="1.5" stroke-dasharray="1 3"/>
+                        <circle cx="50" cy="50" r="8" fill="#FBBF24"/>
+                        <polygon points="50,10 53,50 50,90 47,50" fill="#E0E7FF" transform="rotate(-15, 50, 50)"/>
+                    </svg>
+                </div>
+                <p class="text-lg text-gray-300 font-medium animate-pulse">Initializing secure connection...</p>
+            </div>
+        </main>
 
         <!-- FIXED BOTTOM NAVIGATION -->
         <nav class="fixed bottom-0 left-0 right-0 bg-gray-900 shadow-2xl border-t border-indigo-700/50 z-20">
@@ -141,22 +153,32 @@
                 await loadUserProfile();
                 setupHistoryListener();
                 
-                // Rerender the current view (updates forms with loaded data)
-                renderCurrentView(); 
-
                 console.log("Firebase initialized. User ID:", window.userId);
+
+                // *** THIS IS THE FIX ***
+                // ONLY render the initial view AFTER auth is confirmed.
+                switchView('home'); 
             });
 
             // Attempt custom token sign-in if token is available
             if (initialAuthToken) {
                 try {
                     await signInWithCustomToken(window.auth, initialAuthToken);
-                } catch (e) {
+                } catch (e)
+                {
                     console.error("Custom token sign-in failed:", e);
+                    // If token fails, auth listener will still trigger anonymous sign-in
                 }
+            } else if (!window.auth.currentUser) {
+                // If no token and no user, trigger anonymous sign-in immediately
+                // The onAuthStateChanged listener will catch this.
+                signInAnonymously(window.auth).catch(e => console.error("Initial anonymous sign-in failed:", e));
             }
+
         } else {
             console.error("Firebase config is missing.");
+            // If Firebase is missing, show an error.
+            document.getElementById('content-area').innerHTML = '<p class="text-center mt-8 text-red-400">Error: Firebase configuration is missing. The app cannot start.</p>';
         }
 
         // Expose Firebase functions to global scope for use in non-module scripts
@@ -202,6 +224,9 @@
         }
 
         function showModal(title, content, type = 'info') {
+            // Avoid opening modal if one is already open
+            if (state.modalOpen) return; 
+            
             const modalContainer = document.getElementById('modal-container');
             let color = type === 'error' ? 'bg-red-900 border-red-500' : 'bg-gray-800 border-indigo-500';
             let titleColor = type === 'error' ? 'text-red-400' : 'text-indigo-400';
@@ -231,13 +256,15 @@
             const { db, appId, userId, doc, firebaseExports } = window.firebaseExports;
             
             try {
+                // We query the 'user_profile' collection for the 'details' document
                 const profileQuery = firebaseExports.query(
                     firebaseExports.collection(db, 'artifacts', appId, 'users', userId, 'user_profile')
                 );
                 const snapshot = await firebaseExports.getDocs(profileQuery);
 
                 if (!snapshot.empty) {
-                    const data = snapshot.docs[0].data();
+                    // Assuming 'details' is the only doc, or we take the first one
+                    const data = snapshot.docs[0].data(); 
                     state.userProfile = {
                         name: data.name || '',
                         dob: data.dob || '',
@@ -245,6 +272,8 @@
                         city: data.city || ''
                     };
                     console.log("Profile loaded:", state.userProfile);
+                } else {
+                    console.log("No user profile found, using defaults.");
                 }
             } catch (e) {
                 console.error("Error loading profile:", e);
@@ -258,14 +287,14 @@
             }
 
             const { db, appId, userId, doc, setDoc } = window.firebaseExports;
-            // Note: We use a specific document ID ('details') for consistency.
+            // We use a specific document ID ('details') for consistency.
             const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'user_profile', 'details'); 
 
             try {
                 await setDoc(profileRef, details, { merge: true });
                 state.userProfile = details;
                 showModal('Success', 'Your default birth details have been saved! Your readings will auto-fill with this data.', 'info');
-                renderCurrentView(); 
+                renderCurrentView(); // Re-render to update forms
             } catch (e) {
                 console.error("Error saving profile:", e);
                 showModal('Error', 'Failed to save profile. Please check console for details.', 'error');
@@ -273,11 +302,18 @@
         }
         
         function setupHistoryListener() {
-            if (!window.userId || !window.db || window.activeSnapshotUnsubscribe) return;
+            if (window.activeSnapshotUnsubscribe) {
+                console.log("Detaching old history listener.");
+                window.activeSnapshotUnsubscribe(); // Detach old listener if user changes
+                window.activeSnapshotUnsubscribe = null;
+            }
+
+            if (!window.userId || !window.db) return;
+
 
             const { db, appId, userId, collection, query, onSnapshot } = window.firebaseExports;
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
-            const q = query(historyRef);
+            const q = query(historyRef); // Removed orderBy for stability
 
             window.activeSnapshotUnsubscribe = onSnapshot(q, (snapshot) => {
                 const readings = [];
@@ -296,7 +332,7 @@
             }, (error) => {
                 console.error("Error listening to history:", error);
             });
-            console.log("History listener active.");
+            console.log("History listener active for user:", window.userId);
         }
 
         async function saveReading(readingData) {
@@ -309,7 +345,7 @@
                 await addDoc(historyRef, {
                     ...readingData,
                     timestamp: Date.now(),
-                    userId: userId
+                    userId: userId // Ensure reading is tagged with user ID
                 });
                 console.log("Reading saved to history.");
             } catch (e) {
@@ -318,7 +354,11 @@
         }
 
         async function deleteReading(id) {
+            // This is intentionally disabled for stability in the environment.
             showModal('Action Disabled', 'Deleting history items is disabled to maintain code stability in the current environment.', 'info');
+            // In a real app, you would enable deleteDoc in the firebaseExports and use:
+            // const { db, appId, userId, doc, deleteDoc } = window.firebaseExports;
+            // await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'astrology_readings', id));
         }
         
         // --- GEMINI API COMMUNICATION (SECURE PROXY) ---
@@ -356,7 +396,11 @@
                         delay *= 2;
                         continue;
                     }
-                    throw new Error(`Proxy request failed with status: ${response.status}`);
+                    // Handle specific errors from the proxy
+                    if (!response.ok) {
+                        const errorResult = await response.json();
+                        throw new Error(errorResult.error || `Proxy request failed with status: ${response.status}`);
+                    }
                 }
 
                 if (!response.ok) {
@@ -403,7 +447,7 @@
                 ${isAuthenticated ? `
                     <div class="mb-4 text-sm">
                         <p class="font-semibold text-indigo-300">Signed in as:</p>
-                        <p class="text-gray-300 break-words">${window.auth.currentUser.email || 'Anonymous User'}</p>
+                        <p class="text-gray-300 break-words">${window.auth.currentUser.email || 'Permanent User'}</p>
                         <p class="text-xs text-gray-500 mt-1">User ID: ${window.userId}</p>
                     </div>
                     ${renderProfileForm()}
@@ -411,7 +455,7 @@
                 ` : `
                     <div class="text-center mb-6 p-4 bg-yellow-900/50 rounded-lg border border-yellow-700">
                         <p class="font-bold text-yellow-300 mb-2">Anonymous User</p>
-                        <p class="text-sm text-yellow-200">Your history is currently saved locally. Sign in below to save your data permanently!</p>
+                        <p class="text-sm text-yellow-200">Your history is currently saved locally. Sign in or Sign up below to save your data permanently!</p>
                     </div>
                     ${renderAuthForm(true)}
                     <p class="text-center text-sm my-3 text-gray-400">- OR -</p>
@@ -468,7 +512,7 @@
                     await createUserWithEmailAndPassword(window.auth, email, password);
                     showModal('Account Created!', `Successfully created and signed in as ${email}.`, 'info');
                 }
-                closeModal();
+                closeModal(); // Close the auth modal on success
             } catch (error) {
                 let errorMessage = 'Authentication Failed.';
                 if (error.code) {
@@ -484,8 +528,8 @@
             const { signOut } = window.firebaseExports;
             await signOut(window.auth);
             state.userProfile = { name: '', dob: '', tob: '', city: '' }; // Clear local profile
-            showModal('Signed Out', 'You have been signed out.', 'info');
-            closeModal();
+            showModal('Signed Out', 'You have been signed out. You are now an anonymous user.', 'info');
+            // Auth listener will handle signing in anonymously next
         }
 
         function handleSaveProfile() {
@@ -510,22 +554,32 @@
             
             // Update nav bar active state
             document.querySelectorAll('.nav-item').forEach(item => {
-                if (item.dataset.view === view) {
-                    item.classList.add('text-indigo-400', 'font-bold');
-                    item.classList.remove('text-indigo-300/50');
+                const itemView = item.dataset.view;
+                if (itemView === view) {
+                    item.classList.add('font-bold');
+                    item.classList.remove('text-gray-400', 'hover:text-indigo-300', 'hover:text-pink-300', 'hover:text-teal-300');
+                    if(view === 'home') item.classList.add('text-indigo-400');
+                    if(view === 'chart') item.classList.add('text-indigo-400');
+                    if(view === 'health') item.classList.add('text-pink-400');
+                    if(view === 'history') item.classList.add('text-teal-400');
                 } else {
-                    item.classList.remove('text-indigo-400', 'font-bold');
-                    item.classList.add('text-indigo-300/50');
+                    item.classList.remove('text-indigo-400', 'text-pink-400', 'text-teal-400', 'font-bold');
+                    item.classList.add('text-gray-400');
+                    if(itemView === 'home') item.classList.add('hover:text-indigo-300');
+                    if(itemView === 'chart') item.classList.add('hover:text-indigo-300');
+                    if(itemView === 'health') item.classList.add('hover:text-pink-300');
+                    if(itemView === 'history') item.classList.add('hover:text-teal-300');
                 }
             });
             renderCurrentView();
         }
 
         function renderCurrentView() {
-            // We removed the blocking isAuthReady check, but we still ensure the UID exists for data functions
-            if (!window.db) {
-                document.getElementById('content-area').innerHTML = '<p class="text-center mt-8 text-indigo-400">Initializing services...</p>';
-                return;
+            // This function is now ONLY called *after* Firebase is ready.
+            if (!window.isAuthReady || !window.db) {
+                 // The initial splash screen will just stay visible if this fails
+                 console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
+                 return;
             }
 
             switch (state.currentView) {
@@ -630,7 +684,7 @@
         function renderHealthForm() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-indigo-300 mb-6 border-b border-indigo-700/50 pb-2">Holistic Health Profile</h2>
+                <h2 class="text-3xl font-bold text-pink-300 mb-6 border-b border-pink-700/50 pb-2">Holistic Health Profile</h2>
                 <form id="health-form" class="bg-gray-800 p-5 rounded-2xl shadow-xl">
                     <p class="text-sm text-gray-400 mb-4">Get an astrological perspective on your vitality, strengths, and areas for preventative care.</p>
                     ${getFormFields('health')}
@@ -644,8 +698,8 @@
         function renderHistory() {
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
-                <h2 class="text-3xl font-bold text-indigo-300 mb-6 border-b border-indigo-700/50 pb-2">Reading History</h2>
-                <p class="text-sm text-gray-400 mb-6">Your personal archive of cosmic insights. <span class="font-bold">User ID: ${window.userId}</span></p>
+                <h2 class="text-3xl font-bold text-teal-300 mb-6 border-b border-teal-700/50 pb-2">Reading History</h2>
+                <p class="text-sm text-gray-400 mb-6">Your personal archive of cosmic insights. <span class="font-bold block text-xs mt-1">User ID: ${window.userId}</span></p>
                 <div id="history-list" class="space-y-4">
                     ${state.history.length === 0 ? '<p class="text-center text-gray-500">No readings saved yet. Generate one now!</p>' : ''}
                 </div>
@@ -655,10 +709,11 @@
 
             state.history.forEach(reading => {
                 const isExpanded = reading.id === historyList.dataset.expandedId;
-                const snippet = reading.content.substring(0, 150) + (reading.content.length > 150 ? '...' : '');
-                const title = reading.year ? `Annual Forecast (${reading.year})` : (reading.type === 'health' ? 'Health Profile' : 'Natal Chart Overview');
-                const subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : reading.type.toUpperCase();
-                const dateTime = new Date(reading.timestamp).toLocaleString();
+                // Check if content exists before substring
+                const snippet = reading.content ? reading.content.substring(0, 150) + (reading.content.length > 150 ? '...' : '') : 'No content available.';
+                const title = reading.year ? `Annual Forecast (${reading.year})` : (reading.type === 'health' ? 'Health Profile' : (reading.title || 'Natal Chart Overview'));
+                const subtitle = reading.userQuery ? `Query: ${reading.userQuery}` : (reading.type ? reading.type.toUpperCase() : 'CHART');
+                const dateTime = reading.timestamp ? new Date(reading.timestamp).toLocaleString() : 'Date unknown';
 
                 const item = document.createElement('div');
                 item.className = `bg-gray-800 rounded-xl shadow-lg border border-indigo-700/50 overflow-hidden cursor-pointer transition duration-300 hover:shadow-indigo-500/30`;
@@ -681,11 +736,11 @@
                                 <div>City: ${reading.birthDetails.city}</div>
                             </div>
                             <p class="font-semibold text-indigo-400 mt-4">Reading:</p>
-                            <div class="prose max-w-none text-gray-300">${reading.content.replace(/\n/g, '<br>')}</div>
+                            <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.content || 'No content.'}</div>
                             
                             ${reading.followUpContent ? `
                                 <p class="font-semibold text-indigo-400 mt-4 border-t border-indigo-700/50 pt-4">Follow-up: ${reading.followUpQuestion}</p>
-                                <div class="prose max-w-none text-gray-300">${reading.followUpContent.replace(/\n/g, '<br>')}</div>
+                                <div class="prose max-w-none text-gray-300" style="white-space: pre-wrap;">${reading.followUpContent}</div>
                             ` : ''}
                             
                             <!-- Delete button disabled for stability -->
@@ -719,7 +774,7 @@
             outputDiv.innerHTML = `
                 <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl border border-indigo-700/50 space-y-4">
                     <h3 class="text-2xl font-bold text-indigo-400 border-b border-indigo-500/50 pb-2">${state.currentReading.title}</h3>
-                    <div class="prose max-w-none text-gray-300 space-y-4 whitespace-pre-wrap">${readingText}</div>
+                    <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${readingText}</div>
                     
                     <!-- Follow-up Section -->
                     <div class="mt-6 p-4 bg-gray-900 rounded-lg border border-gray-700">
@@ -749,7 +804,7 @@
                 <p class="font-semibold text-indigo-400">Your Question:</p>
                 <p class="italic text-gray-300">"${query}"</p>
                 <p class="font-semibold text-indigo-400">AI Response:</p>
-                <div class="prose max-w-none text-gray-300 space-y-4 whitespace-pre-wrap">${answer}</div>
+                <div class="prose max-w-none text-gray-300 space-y-4" style="white-space: pre-wrap;">${answer}</div>
             `;
             readingBlock.appendChild(followUpBlock);
         }
@@ -775,7 +830,7 @@
                 currentReading.birthDetails,
                 followUpQuery,
                 currentReading.year,
-                currentReading.currentView, 
+                currentReading.type, 
                 currentReading.content // Pass the previous reading as context
             );
 
@@ -838,11 +893,11 @@
 
             if (generatedText) {
                 // Update state and display output
-                state.currentReading = { birthDetails, userQuery: query, year, type, content: generatedText, title };
+                // state.currentReading is set inside generateReading
                 renderReadingOutput(generatedText);
                 
                 // Save to history
-                await saveReading({ ...readingData, content: generatedText, userQuery: query || null });
+                await saveReading({ ...state.currentReading, userQuery: query || null });
             }
         }
 
@@ -857,20 +912,18 @@
 
             if (generatedText) {
                 // Update state and display output
-                state.currentReading = { birthDetails, userQuery: query, year: null, type, content: generatedText, title };
+                // state.currentReading is set inside generateReading
                 renderReadingOutput(generatedText);
                 
                 // Save to history
-                await saveReading({ ...readingData, content: generatedText, userQuery: query || null });
+                await saveReading({ ...state.currentReading, userQuery: query || null });
             }
         }
         
         // --- INITIALIZATION ---
         
-        // Initial view setup once auth is ready
-        window.onload = () => {
-            switchView('home');
-        };
+        // No window.onload is needed because the initial render
+        // is now triggered by the onAuthStateChanged listener.
 
     </script>
 </body>
