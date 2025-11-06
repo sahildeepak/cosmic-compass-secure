@@ -128,10 +128,29 @@
 
         // Mandated Global Variables Check
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        //
+        // === THIS IS THE CRITICAL FIX ===
+        //
+        // REMOVE the dynamic __firebase_config check
+        // const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        // const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        if (firebaseConfig) {
+        // ADD your own Firebase config object here
+        const firebaseConfig = {
+            apiKey: "AIzaSyD_hTndy6xst4f8hxAbJ42R9sX_82BMFdc",
+            authDomain: "cosmic-compass-dbc12.firebaseapp.com",
+            projectId: "cosmic-compass-dbc12",
+            storageBucket: "cosmic-compass-dbc12.firebasestorage.app",
+            messagingSenderId: "1077342508451",
+            appId: "1:1077342508451:web:b3896f9add3003ba80f616",
+            measurementId: "G-9QDKQVFJ1Y"
+        };
+        
+        // We set initialAuthToken to null because it doesn't exist on Netlify
+        const initialAuthToken = null; 
+
+        if (firebaseConfig && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
             setLogLevel('debug'); // Enable Firestore logging for debugging
             const app = initializeApp(firebaseConfig);
             window.db = getFirestore(app);
@@ -176,8 +195,9 @@
             }
 
         } else {
-            console.error("Firebase config is missing.");
+            console.error("Firebase config is missing. Please paste your Firebase project config into index.html.");
             // If Firebase is missing, show an error.
+            // REMOVE THE CONFIG OBJECT FROM HERE
             document.getElementById('content-area').innerHTML = '<p class="text-center mt-8 text-red-400">Error: Firebase configuration is missing. The app cannot start.</p>';
         }
 
