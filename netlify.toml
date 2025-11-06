@@ -1,6 +1,7 @@
-# This file tells Netlify to increase the timeout for your function
+# This file tells Netlify to increase the timeout and max size for your function
 
 # Specific configuration for your generateReading function
-# This is the only block needed to set the 26-second timeout.
+# Configure both timeout and maximum payload size for image uploads
 [functions."generateReading"]
   timeout = 26
+  max_size = "10mb"
