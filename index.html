@@ -112,122 +112,25 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs -->
+    <!-- 
+      *** THE FIX IS HERE ***
+      All JavaScript is now inside ONE single <script type="module"> block.
+      This guarantees Firebase is loaded and ready before any app logic runs.
+    -->
     <script type="module">
+        // --- Firebase SDK Imports ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, addDoc, getDocs, orderBy, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Global Firebase variables
-        window.db = null;
-        window.auth = null;
-        window.userId = null;
-        window.isAuthReady = false;
-        window.activeSnapshotUnsubscribe = null;
+        // --- Global Firebase Variables ---
+        let db = null;
+        let auth = null;
+        let userId = null;
+        let isAuthReady = false;
+        let activeSnapshotUnsubscribe = null;
 
-        // Mandated Global Variables Check
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        
-        // --- THIS IS THE CRITICAL FIX ---
-        // You MUST paste your own Firebase config object here.
-        // Get it from your Firebase project console.
-        const firebaseConfig = {
-          apiKey: "AIzaSyD_hTndy6xst4f8hxAbJ42R9sX_82BMFdc",
-          authDomain: "cosmic-compass-dbc12.firebaseapp.com",
-          projectId: "cosmic-compass-dbc12",
-          storageBucket: "cosmic-compass-dbc12.firebasestorage.app",
-          messagingSenderId: "1077342508451",
-          appId: "1:1077342508451:web:b3896f9add3003ba80f616",
-          measurementId: "G-9QDKQVFJ1Y"
-        };
-        
-        // We set initialAuthToken to null because it doesn't exist on Netlify
-        const initialAuthToken = null; 
-
-        // Check if the config has been filled
-        if (firebaseConfig && firebaseConfig.apiKey && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
-            setLogLevel('debug'); // Enable Firestore logging for debugging
-            const app = initializeApp(firebaseConfig);
-            window.db = getFirestore(app);
-            window.auth = getAuth(app);
-            
-            // 1. Initial Authentication and Listener Setup
-            onAuthStateChanged(window.auth, async (user) => {
-                if (user) {
-                    window.userId = user.uid;
-                } else {
-                    // Sign in anonymously if no user is found
-                    try {
-                        await signInAnonymously(window.auth);
-                        window.userId = window.auth.currentUser?.uid || crypto.randomUUID();
-                    } catch (error) {
-                        console.error("Anonymous sign-in failed:", error);
-                        // This is the error you were seeing: auth/configuration-not-found
-                        // This MUST be fixed by ENABLING Anonymous Sign-In in your Firebase project.
-                        document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
-                            <h3 class="font-bold text-red-300 text-lg">Error: Could not authenticate with server.</h3>
-                            <p class="text-red-200 mt-2">Please ensure **Anonymous Sign-In** is enabled in your Firebase project's Authentication settings.</p>
-                        </div>`;
-                        return; // Stop app initialization
-                    }
-                }
-                
-                window.isAuthReady = true;
-                
-                // Once authenticated, load user profile and set up history listener
-                await loadUserProfile();
-                setupHistoryListener();
-                
-                console.log("Firebase initialized. User ID:", window.userId);
-
-                // *** THIS IS THE LOGIC FIX ***
-                // ONLY render the initial view AFTER auth is confirmed.
-                switchView('home'); 
-            });
-
-            // Handle the case where there is no pre-existing auth token
-            if (!initialAuthToken && !window.auth.currentUser) {
-                // Trigger anonymous sign-in immediately
-                // The onAuthStateChanged listener will catch this.
-                signInAnonymously(window.auth).catch(e => {
-                    console.error("Initial anonymous sign-in trigger failed:", e);
-                    // This error will be handled by the onAuthStateChanged listener's catch block
-                });
-            }
-
-        } else {
-            console.error("Firebase config is missing. Please paste your Firebase project config into index.html.");
-            // If Firebase is missing, show a clear error.
-            document.getElementById('content-area').innerHTML = `<div class="text-center p-4 bg-red-900/50 border border-red-700 rounded-lg">
-                <h3 class="font-bold text-red-300 text-lg">Error: Firebase configuration is missing.</h3>
-                <p class="text-red-200 mt-2">The app cannot start. Please paste your Firebase project config into the \`index.html\` file.</p>
-            </div>`;
-        }
-
-        // Expose Firebase functions to global scope for use in non-module scripts
-        window.firebaseExports = {
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword,
-            signOut,
-            doc,
-            setDoc,
-            collection,
-            query,
-            where,
-            addDoc,
-            onSnapshot,
-            getDocs,
-            orderBy,
-            deleteDoc, // Added deleteDoc
-            appId,
-            db,
-            auth
-        };
-    </script>
-    
-    <!-- Application Logic -->
-    <script>
         // --- GLOBAL APP STATE ---
         let state = {
             currentView: 'home', // Default view is 'home'
@@ -265,21 +168,33 @@
             `;
             state.modalOpen = true;
         }
-
-        function closeModal() {
+        
+        // Make functions globally accessible for inline onclick="" handlers
+        window.closeModal = () => {
             document.getElementById('modal-container').innerHTML = '';
             state.modalOpen = false;
-        }
+        };
+        window.showProfileModal = showProfileModal;
+        window.switchView = switchView;
+        window.handleAuth = handleAuth;
+        window.handleSignOut = handleSignOut;
+        window.handleSaveProfile = handleSaveProfile;
+        window.toggleHistoryExpansion = toggleHistoryExpansion;
+        window.deleteReading = deleteReading;
+        window.handleFollowUp = handleFollowUp;
+        window.handleChartSubmit = handleChartSubmit;
+        window.handleHealthSubmit = handleHealthSubmit;
+
 
         // --- FIREBASE / DATA MANAGEMENT ---
         async function loadUserProfile() {
-            if (!window.userId || !window.db) return;
-            const { db, appId, userId, doc, firebaseExports } = window.firebaseExports;
+            if (!userId || !db) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             try {
-                const profileQuery = firebaseExports.query(
-                    firebaseExports.collection(db, 'artifacts', appId, 'users', userId, 'user_profile')
+                const profileQuery = query(
+                    collection(db, 'artifacts', appId, 'users', userId, 'user_profile')
                 );
-                const snapshot = await firebaseExports.getDocs(profileQuery);
+                const snapshot = await getDocs(profileQuery);
                 if (!snapshot.empty) {
                     const data = snapshot.docs[0].data(); 
                     state.userProfile = {
@@ -298,11 +213,11 @@
         }
 
         async function saveUserProfile(details) {
-            if (!window.userId || !window.db) {
+            if (!userId || !db) {
                 showModal('Error', 'Please wait for authentication to complete.', 'error');
                 return;
             }
-            const { db, appId, userId, doc, setDoc } = window.firebaseExports;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const profileRef = doc(db, 'artifacts', appId, 'users', userId, 'user_profile', 'details'); 
             try {
                 await setDoc(profileRef, details, { merge: true });
@@ -316,16 +231,17 @@
         }
         
         function setupHistoryListener() {
-            if (window.activeSnapshotUnsubscribe) {
+            if (activeSnapshotUnsubscribe) {
                 console.log("Detaching old history listener.");
-                window.activeSnapshotUnsubscribe(); 
-                window.activeSnapshotUnsubscribe = null;
+                activeSnapshotUnsubscribe(); 
+                activeSnapshotUnsubscribe = null;
             }
-            if (!window.userId || !window.db) return;
-            const { db, appId, userId, collection, query, onSnapshot } = window.firebaseExports;
+            if (!userId || !db) return;
+            
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
             const q = query(historyRef); 
-            window.activeSnapshotUnsubscribe = onSnapshot(q, (snapshot) => {
+            activeSnapshotUnsubscribe = onSnapshot(q, (snapshot) => {
                 const readings = [];
                 snapshot.forEach(doc => {
                     const data = doc.data();
@@ -339,12 +255,12 @@
             }, (error) => {
                 console.error("Error listening to history:", error);
             });
-            console.log("History listener active for user:", window.userId);
+            console.log("History listener active for user:", userId);
         }
 
         async function saveReading(readingData) {
-            if (!window.userId || !window.db) return;
-            const { db, appId, userId, collection, addDoc } = window.firebaseExports;
+            if (!userId || !db) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
             const historyRef = collection(db, 'artifacts', appId, 'users', userId, 'astrology_readings');
             try {
                 await addDoc(historyRef, {
@@ -359,13 +275,11 @@
         }
 
         async function deleteReading(id) {
-             if (!window.userId || !window.db) return;
-             // Re-enabled deleteDoc
-             const { db, appId, userId, doc, deleteDoc } = window.firebaseExports;
+             if (!userId || !db) return;
+             const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
              try {
                 await deleteDoc(doc(db, 'artifacts', appId, 'users', userId, 'astrology_readings', id));
                 console.log("Reading deleted.");
-                // The onSnapshot listener will automatically update the UI
              } catch (e) {
                 console.error("Error deleting reading:", e);
                 showModal('Error', 'Could not delete reading.', 'error');
@@ -407,26 +321,21 @@
                     }
                     
                     // --- ROBUST ERROR HANDLING FIX ---
-                    // Read the error response as text ONCE.
                     let errorText = `Proxy request failed with status: ${response.status}`;
                     try {
-                        const rawError = await response.text(); // Read the body as text
-                        // Try to parse it as JSON
+                        const rawError = await response.text(); 
                         try {
                             const errorResult = JSON.parse(rawError);
                             errorText = errorResult.error || rawError;
                         } catch (e) {
-                            // If parsing fails, use the raw text
                             errorText = rawError;
                         }
                     } catch (e) {
-                        // Failed to read text body, just use status
                         console.error("Could not read error response body:", e);
                     }
-                    throw new Error(errorText); // This will be caught by the final catch block
+                    throw new Error(errorText); 
                 }
 
-                // This check is now safe because the loop above will throw if !response.ok
                 if (!response.ok) {
                     throw new Error("Failed to get a successful response from the server after retries.");
                 }
@@ -437,7 +346,6 @@
                     throw new Error(result.error);
                 }
 
-                // If this is not a follow-up, set the current reading state
                 if (!previousReading) {
                     state.currentReading = {
                         title: readingData.title,
@@ -451,7 +359,6 @@
                 return result.text;
             } catch (error) {
                 console.error("AI Generation Error:", error);
-                // The error message will now be more informative (e.g., the actual text from the server)
                 showModal('AI Generation Failed', `There was an error generating the reading: ${error.message}. Please check your Netlify logs and Gemini API Key.`, 'error');
                 return null;
             } finally {
@@ -461,17 +368,17 @@
 
         // --- AUTH/PROFILE MODAL LOGIC ---
         function showProfileModal(requireAuth = false) {
-            if (!window.isAuthReady) {
+            if (!isAuthReady) {
                 showModal('Loading', 'Please wait while we connect to the server...', 'info');
                 return;
             }
-            const isAuthenticated = window.auth.currentUser && !window.auth.currentUser.isAnonymous;
+            const isAuthenticated = auth.currentUser && !auth.currentUser.isAnonymous;
             const profileContent = `
                 ${isAuthenticated ? `
                     <div class="mb-4 text-sm">
                         <p class="font-semibold text-indigo-300">Signed in as:</p>
-                        <p class="text-gray-300 break-words">${window.auth.currentUser.email || 'Permanent User'}</p>
-                        <p class="text-xs text-gray-500 mt-1">User ID: ${window.userId}</p>
+                        <p class="text-gray-300 break-words">${auth.currentUser.email || 'Permanent User'}</p>
+                        <p class="text-xs text-gray-500 mt-1">User ID: ${userId}</p>
                     </div>
                     ${renderProfileForm()}
                     <button class="mt-4 w-full py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition duration-200" onclick="handleSignOut()">Sign Out</button>
@@ -514,7 +421,6 @@
             const formId = isSignIn ? 'sign-in' : 'sign-up';
             const email = document.getElementById(`${formId}-email`).value;
             const password = document.getElementById(`${formId}-password`).value;
-            const { createUserWithEmailAndPassword, signInWithEmailAndPassword } = window.firebaseExports;
             if (!email || password.length < 6) {
                 showModal('Error', 'Please enter a valid email and a password of at least 6 characters.', 'error');
                 return;
@@ -522,10 +428,10 @@
             try {
                 showLoading(true);
                 if (isSignIn) {
-                    await signInWithEmailAndPassword(window.auth, email, password);
+                    await signInWithEmailAndPassword(auth, email, password);
                     showModal('Welcome Back!', `Successfully signed in as ${email}.`, 'info');
                 } else {
-                    await createUserWithEmailAndPassword(window.auth, email, password);
+                    await createUserWithEmailAndPassword(auth, email, password);
                     showModal('Account Created!', `Successfully created and signed in as ${email}.`, 'info');
                 }
                 closeModal(); 
@@ -540,8 +446,7 @@
             }
         }
         async function handleSignOut() {
-            const { signOut } = window.firebaseExports;
-            await signOut(window.auth);
+            await signOut(auth);
             state.userProfile = { name: '', dob: '', tob: '', city: '' }; 
             showModal('Signed Out', 'You have been signed out. You are now an anonymous user.', 'info');
             // Auth listener will handle signing in anonymously next and re-render
@@ -584,8 +489,7 @@
             renderCurrentView();
         }
         function renderCurrentView() {
-            if (!window.isAuthReady || !window.db) {
-                 // The initial splash screen will just stay visible if this fails
+            if (!isAuthReady || !db) {
                  console.error("RenderCurrentView called before Firebase was ready. This shouldn't happen.");
                  return;
             }
@@ -688,7 +592,7 @@
             const contentArea = document.getElementById('content-area');
             contentArea.innerHTML = `
                 <h2 class="text-3xl font-bold text-teal-300 mb-6 border-b border-teal-700/50 pb-2">Reading History</h2>
-                <p class="text-sm text-gray-400 mb-6">Your personal archive of cosmic insights. <span class="font-bold block text-xs mt-1">User ID: ${window.userId}</span></p>
+                <p class="text-sm text-gray-400 mb-6">Your personal archive of cosmic insights. <span class="font-bold block text-xs mt-1">User ID: ${userId}</span></p>
                 <div id="history-list" class="space-y-4">
                     ${state.history.length === 0 ? '<p class="text-center text-gray-500">No readings saved yet. Generate one now!</p>' : ''}
                 </div>
@@ -863,7 +767,7 @@
         // --- INITIALIZATION ---
         
         // No window.onload is needed because the initial render
-        // is now triggered by the onAuthStateChanged listener.
+        // is now triggered by the onAuthStateChanged listener in the module script.
 
     </script>
 </body>
