@@ -410,7 +410,7 @@
                     // Read the error response as text ONCE.
                     let errorText = `Proxy request failed with status: ${response.status}`;
                     try {
-                        const rawError = await response.text();
+                        const rawError = await response.text(); // Read the body as text
                         // Try to parse it as JSON
                         try {
                             const errorResult = JSON.parse(rawError);
@@ -423,9 +423,10 @@
                         // Failed to read text body, just use status
                         console.error("Could not read error response body:", e);
                     }
-                    throw new Error(errorText);
+                    throw new Error(errorText); // This will be caught by the final catch block
                 }
 
+                // This check is now safe because the loop above will throw if !response.ok
                 if (!response.ok) {
                     throw new Error("Failed to get a successful response from the server after retries.");
                 }
